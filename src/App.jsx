@@ -899,21 +899,21 @@ export default function App() {
             <div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>📊 TABLA DE POSICIONES</div><div style={{fontSize:11,color:"#555",marginTop:2}}>Fase de grupos · 12 grupos</div></div>
             <button onClick={fetchStandings} style={{...pill(false),padding:"8px 14px",borderColor:"#1a6eb5",color:"#6aadff"}}>🔄 Actualizar</button>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
             {Object.entries(standings).map(([grp,teams])=>(
               <div key={grp} style={{background:"rgba(0,31,63,.85)",border:"1px solid #1a6eb544",borderRadius:12,overflow:"hidden"}}>
                 <div style={{background:"#1a6eb5",padding:"7px 12px",fontSize:11,fontWeight:800,letterSpacing:".15em",color:"#fff"}}>GRUPO {grp}</div>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
                   <thead><tr style={{borderBottom:"1px solid rgba(255,255,255,.08)"}}>
-                    {["#","Equipo","PJ","PG","PE","PP","GF","GC","Pts"].map(h=><th key={h} style={{padding:"5px 6px",color:"#555",fontWeight:700,textAlign:h==="Equipo"?"left":"center",fontSize:9}}>{h}</th>)}
+                    {["#","Equipo","PJ","PG","PE","PP","GF","GC","Pts"].map(h=><th key={h} style={{padding:"6px 8px",color:"#888",fontWeight:700,textAlign:h==="Equipo"?"left":"center",fontSize:12}}>{h}</th>)}
                   </tr></thead>
                   <tbody>
                     {teams.map((t,i)=>(
                       <tr key={t.t} style={{borderBottom:"1px solid rgba(255,255,255,.04)",background:t.t===favorite?"rgba(201,168,76,.08)":"transparent"}}>
                         <td style={{padding:"6px",textAlign:"center"}}><div style={{width:16,height:16,borderRadius:3,background:i<2?"#00a651":i===2?"#ff7a00":"transparent",border:i<2||i===2?"none":"1px solid #333",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"#fff",margin:"0 auto"}}>{i+1}</div></td>
-                        <td style={{padding:"6px 8px"}}><div style={{display:"flex",alignItems:"center",gap:5}}><Flag team={t.t} size={16}/><span style={{color:t.t===favorite?"#ffd700":"#ddd",fontWeight:t.t===favorite?700:400,fontSize:11,overflow:"hidden",textOverflow:"ellipsis",maxWidth:90}}>{t.t}</span></div></td>
-                        {[t.pj,t.pg,t.pe,t.pp,t.gf,t.gc].map((v,j)=><td key={j} style={{padding:"6px",textAlign:"center",color:"#666",fontSize:11}}>{v}</td>)}
-                        <td style={{padding:"6px",textAlign:"center",fontWeight:800,color:t.pts>0?"#ffd700":"#444",fontSize:12}}>{t.pts}</td>
+                        <td style={{padding:"6px 8px"}}><div style={{display:"flex",alignItems:"center",gap:5}}><Flag team={t.t} size={20}/><span style={{color:t.t===favorite?"#ffd700":"#ddd",fontWeight:t.t===favorite?700:400,fontSize:13,overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{t.t}</span></div></td>
+                        {[t.pj,t.pg,t.pe,t.pp,t.gf,t.gc].map((v,j)=><td key={j} style={{padding:"7px",textAlign:"center",color:"#aaa",fontSize:13}}>{v}</td>)}
+                        <td style={{padding:"7px",textAlign:"center",fontWeight:900,color:t.pts>0?"#ffd700":"#555",fontSize:15}}>{t.pts}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1302,7 +1302,7 @@ export default function App() {
                           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:9}}>
                             <div style={{textAlign:"center",flex:1}}>
                               <div style={{display:"flex",justifyContent:"center",marginBottom:4}}>{TEAM_META[m.home]?<Flag team={m.home} size={36}/>:<div style={{fontSize:24,lineHeight:1}}>🏆</div>}</div>
-                              <div style={{fontSize:"clamp(9px,1.3vw,11px)",fontWeight:700,color:"#fff",textTransform:"uppercase",lineHeight:1.2}}>{m.home}</div>
+                              <div style={{fontSize:"clamp(11px,1.4vw,13px)",fontWeight:700,color:"#fff",textTransform:"uppercase",lineHeight:1.2}}>{m.home}</div>
                             </div>
                             <div style={{textAlign:"center",padding:"0 7px"}}>
                               {sc?(
@@ -1313,7 +1313,7 @@ export default function App() {
                             </div>
                             <div style={{textAlign:"center",flex:1}}>
                               <div style={{display:"flex",justifyContent:"center",marginBottom:4}}>{TEAM_META[m.away]?<Flag team={m.away} size={36}/>:<div style={{fontSize:24,lineHeight:1}}>🏆</div>}</div>
-                              <div style={{fontSize:"clamp(9px,1.3vw,11px)",fontWeight:700,color:"#fff",textTransform:"uppercase",lineHeight:1.2}}>{m.away}</div>
+                              <div style={{fontSize:"clamp(11px,1.4vw,13px)",fontWeight:700,color:"#fff",textTransform:"uppercase",lineHeight:1.2}}>{m.away}</div>
                             </div>
                           </div>
                           <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 8px",borderRadius:6,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.08)"}}>
