@@ -829,7 +829,7 @@ export default function App() {
 
       {/* HEADER */}
       <div style={{position:"sticky",top:0,zIndex:30,background:"rgba(1,10,28,.98)",backdropFilter:"blur(20px)",borderBottom:"2px solid #c9a84c"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0"}}>
+        <div style={{maxWidth:1440,margin:"0 auto",padding:"10px 16px 0"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <span style={{fontSize:32,lineHeight:1}}>⚽</span>
@@ -870,7 +870,7 @@ export default function App() {
       {/* COUNTDOWN */}
       {countdown&&(
         <div style={{background:"rgba(201,168,76,.08)",borderBottom:"1px solid rgba(201,168,76,.2)",padding:"7px 16px"}}>
-          <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+          <div style={{maxWidth:1440,margin:"0 auto",display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
             <div style={{fontSize:9,color:"#c9a84c",letterSpacing:".12em",fontWeight:700}}>{favorite?`⏱ PRÓXIMO · ${favorite.toUpperCase()}`:"⏱ PRÓXIMO PARTIDO"}</div>
             <div style={{display:"flex",alignItems:"center",gap:7}}>
               <Flag team={countdown.match.home} size={20}/>
@@ -894,7 +894,7 @@ export default function App() {
 
       {/* ── STANDINGS ── */}
       {view==="standings"&&(
-        <div style={{maxWidth:1200,margin:"20px auto",padding:"0 16px 60px"}}>
+        <div style={{maxWidth:1440,margin:"20px auto",padding:"0 16px 60px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
             <div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>📊 TABLA DE POSICIONES</div><div style={{fontSize:11,color:"#555",marginTop:2}}>Fase de grupos · 12 grupos</div></div>
             <button onClick={fetchStandings} style={{...pill(false),padding:"8px 14px",borderColor:"#1a6eb5",color:"#6aadff"}}>🔄 Actualizar</button>
@@ -1097,7 +1097,7 @@ export default function App() {
 
       {/* ── VENUES ── */}
       {view==="venues"&&(
-        <div style={{maxWidth:1200,margin:"20px auto",padding:"0 16px 60px"}}>
+        <div style={{maxWidth:1440,margin:"20px auto",padding:"0 16px 60px"}}>
           <div style={{marginBottom:16}}>
             <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>🏟️ SEDES DEL MUNDIAL 2026</div>
             <div style={{fontSize:11,color:"#555",marginTop:2}}>16 estadios · 3 países · Toca cada sede para más información</div>
@@ -1129,7 +1129,7 @@ export default function App() {
 
       {/* ── LIVE ── */}
       {view==="live"&&(
-        <div style={{maxWidth:1200,margin:"20px auto",padding:"0 16px 60px"}}>
+        <div style={{maxWidth:1440,margin:"20px auto",padding:"0 16px 60px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
             <div>
               <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>🔴 PARTIDOS EN VIVO</div>
@@ -1156,7 +1156,7 @@ export default function App() {
 
       {/* ── BRACKET ── */}
       {view==="bracket"&&(
-        <div style={{maxWidth:1200,margin:"20px auto",padding:"0 16px 60px"}}>
+        <div style={{maxWidth:1440,margin:"20px auto",padding:"0 16px 60px"}}>
           <div style={{fontSize:18,fontWeight:800,color:"#fff",marginBottom:6}}>🏆 CUADRO ELIMINATORIO</div>
           <div style={{fontSize:11,color:"#555",marginBottom:16}}>Cruces confirmados al término de la fase de grupos</div>
           <div style={{overflowX:"auto"}}>
@@ -1172,7 +1172,7 @@ export default function App() {
 
       {/* ── FAVORITES ── */}
       {view==="compact"&&(
-        <div style={{maxWidth:1200,margin:"20px auto",padding:"0 16px 60px"}}>
+        <div style={{maxWidth:1440,margin:"20px auto",padding:"0 16px 60px"}}>
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16,flexWrap:"wrap"}}>
             <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>⭐ MI EQUIPO FAVORITO</div>
             <select value={favorite} onChange={e=>setFavorite(e.target.value)} style={{background:"rgba(255,255,255,.1)",border:"1px solid #c9a84c55",color:"#ffd700",padding:"6px 10px",borderRadius:8,fontFamily:"inherit",fontSize:12,cursor:"pointer",fontWeight:700}}>
@@ -1234,7 +1234,7 @@ export default function App() {
       {view==="schedule"&&(
         <>
           <div style={{position:"sticky",top:105,zIndex:20,background:"rgba(1,10,28,.97)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(255,255,255,.07)",padding:"7px 16px"}}>
-            <div style={{maxWidth:1200,margin:"0 auto",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+            <div style={{maxWidth:1440,margin:"0 auto",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
               <select value={teamFilter} onChange={e=>setTeamFilter(e.target.value)} style={{background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.15)",color:"#fff",padding:"5px 9px",borderRadius:6,fontFamily:"inherit",fontSize:11,cursor:"pointer"}}>
                 <option value="">🌍 Todos los equipos</option>
                 {ALL_TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
@@ -1250,7 +1250,7 @@ export default function App() {
               <span style={{marginLeft:"auto",color:"#444",fontSize:10}}>{filtered.length} partidos</span>
             </div>
           </div>
-          <div style={{maxWidth:1200,margin:"0 auto",padding:"10px 16px 0"}}>
+          <div style={{maxWidth:1440,margin:"0 auto",padding:"10px 16px 0"}}>
             <div style={{display:"flex",gap:0,borderBottom:"1px solid rgba(255,255,255,.07)",marginBottom:10}}>
               {MONTHS.map(m=>(
                 <button key={m.key} onClick={()=>setMonth(m.key)} style={{padding:"8px 20px",border:"none",background:"none",fontFamily:"inherit",fontWeight:700,fontSize:11,letterSpacing:".1em",textTransform:"uppercase",cursor:"pointer",color:month===m.key?"#ffd700":"#555",borderBottom:month===m.key?"3px solid #ffd700":"3px solid transparent",transition:"all .2s"}}>
@@ -1265,7 +1265,7 @@ export default function App() {
               })}
             </div>
           </div>
-          <main style={{maxWidth:1200,margin:"0 auto",padding:"0 16px 60px"}}>
+          <main style={{maxWidth:1440,margin:"0 auto",padding:"0 16px 60px"}}>
             {byDay.length===0?(
               <div style={{textAlign:"center",padding:"60px 20px",color:"#444"}}><div style={{fontSize:48}}>⚽</div><div style={{fontSize:14,marginTop:12}}>No hay partidos con ese filtro</div></div>
             ):byDay.map(([day,matches])=>{
