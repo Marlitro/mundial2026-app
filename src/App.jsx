@@ -1123,23 +1123,23 @@ export default function App() {
             <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>🏟️ SEDES DEL MUNDIAL 2026</div>
             <div style={{fontSize:14,color:"#555",marginTop:2}}>16 estadios · 3 países · Toca cada sede para más información</div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(195px,1fr))",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
             {Object.entries(VENUES).map(([name,v])=>{
               const hostInfo=HOST_FILTERS.find(h=>h.key===v.host);
               return (
-                <div key={name} onClick={()=>setVenueModal(name)} style={{background:"rgba(10,30,65,.8)",border:`1px solid ${v.color}44`,borderRadius:12,overflow:"hidden",cursor:"pointer",transition:"all .25s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                  <div style={{height:105,overflow:"hidden",background:"#0a1628",position:"relative"}}>
-                    <img src={v.img} alt={name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:.7}} onError={e=>{e.target.style.display="none";}}/>
-                    <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(10,30,65,.9),transparent 60%)"}}/>
-                    {hostInfo&&<span style={{position:"absolute",top:6,left:6,fontSize:12,background:`${hostInfo.color}cc`,color:"#fff",padding:"2px 6px",borderRadius:4,fontWeight:700}}>{hostInfo.label}</span>}
-                  </div>
-                  <div style={{padding:"9px 11px"}}>
-                    <div style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:2,lineHeight:1.2}}>{name}</div>
-                    <div style={{fontSize:13,color:"#555",marginBottom:5}}>📍 {v.city}</div>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:13,color:"#777"}}>👥 {v.capacity}</span>
-                      <span style={{fontSize:12,color:v.color,fontWeight:700,background:`${v.color}22`,padding:"2px 6px",borderRadius:4}}>Ver →</span>
+                <div key={name} onClick={()=>setVenueModal(name)} style={{background:"rgba(10,30,65,.8)",border:`1px solid ${v.color}55`,borderRadius:14,overflow:"hidden",cursor:"pointer",transition:"all .25s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                  <div style={{height:190,overflow:"hidden",background:"#0a1628",position:"relative"}}>
+                    <img src={v.img} alt={name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:.85}} onError={e=>{e.target.style.display="none";}}/>
+                    <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(8,20,55,.95) 0%,transparent 50%)"}}/>
+                    {hostInfo&&<span style={{position:"absolute",top:10,left:10,fontSize:12,background:`${hostInfo.color}dd`,color:"#fff",padding:"3px 8px",borderRadius:5,fontWeight:700}}>{hostInfo.label}</span>}
+                    <div style={{position:"absolute",bottom:12,left:14,right:14}}>
+                      <div style={{fontSize:17,fontWeight:800,color:"#fff",lineHeight:1.2,textShadow:"0 1px 6px rgba(0,0,0,.9)"}}>{name}</div>
+                      <div style={{fontSize:13,color:"#ddd",marginTop:3,textShadow:"0 1px 4px rgba(0,0,0,.8)"}}>📍 {v.city}</div>
                     </div>
+                  </div>
+                  <div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span style={{fontSize:14,color:"#aaa"}}>👥 {v.capacity}</span>
+                    <span style={{fontSize:13,color:v.color,fontWeight:700,background:`${v.color}22`,padding:"3px 10px",borderRadius:5,border:`1px solid ${v.color}44`}}>Ver más →</span>
                   </div>
                 </div>
               );
