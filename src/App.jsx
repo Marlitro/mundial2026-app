@@ -675,8 +675,20 @@ const BSlot = ({match:m, color, style={}}) => (
   </div>
 );
 
+// ── BREAKPOINT HOOK ───────────────────────────────────────────────────────────
+function useBreakpoint() {
+  const [w, setW] = useState(typeof window!=="undefined"?window.innerWidth:1280);
+  useEffect(()=>{
+    const fn=()=>setW(window.innerWidth);
+    window.addEventListener("resize",fn);
+    return ()=>window.removeEventListener("resize",fn);
+  },[]);
+  return { isMobile:w<640, isTablet:w>=640&&w<1024, isDesktop:w>=1024, w };
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App() {
+  const {isMobile,isTablet,isDesktop} = useBreakpoint();
   const [view, setView]           = useState("schedule");
   const [month, setMonth]         = useState("2026-06");
   const [tz, setTz]               = useState("et");
@@ -843,24 +855,24 @@ export default function App() {
 
       {/* HEADER */}
       <div style={{position:"sticky",top:0,zIndex:30,background:"rgba(12,24,52,.98)",backdropFilter:"blur(20px)",borderBottom:"2px solid #c9a84c"}}>
-        <div style={{maxWidth:"100%",margin:"0 auto",padding:"10px 16px 0"}}>
+        <div style={{maxWidth:"100%",margin:"0 auto",padding:isMobile?"8px 10px 0":"10px 16px 0"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <span style={{fontSize:32,lineHeight:1}}>⚽</span>
+              <span style={{fontSize:isMobile?24:32,lineHeight:1}}>⚽</span>
               <div>
-                <div style={{fontSize:"clamp(16px,3.2vw,26px)",fontWeight:900,letterSpacing:".12em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
-                <div style={{fontSize:12,color:"#c9a84c",letterSpacing:".15em"}}>GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá · 11 Jun – 19 Jul</div>
+                <div style={{fontSize:isMobile?"clamp(14px,4vw,20px)":"clamp(16px,3.2vw,26px)",fontWeight:900,letterSpacing:".12em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
+                <div style={{fontSize:isMobile?10:12,color:"#c9a84c",letterSpacing:isMobile?".05em":".15em"}}>{isMobile?"🇺🇸🇲🇽🇨🇦 11 Jun – 19 Jul":"GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá · 11 Jun – 19 Jul"}</div>
               </div>
             </div>
             <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>🕐 ZONA HORARIA</span>
-                <div style={{display:"flex",gap:2}}>{TIMEZONES.map(t=><button key={t.key} onClick={()=>setTz(t.key)} style={{...pill(tz===t.key),fontSize:13,padding:"4px 8px"}} title={t.full}>{t.label}</button>)}</div>
+                {!isMobile&&<span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>🕐 ZONA HORARIA</span>}
+                <div style={{display:"flex",gap:2}}>{TIMEZONES.map(t=><button key={t.key} onClick={()=>setTz(t.key)} style={{...pill(tz===t.key),fontSize:isMobile?11:13,padding:"4px 8px"}} title={t.full}>{t.label}</button>)}</div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>📺 VER EN</span>
+                {!isMobile&&<span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>📺 VER EN</span>}
                 <div style={{display:"flex",gap:2}}>
-                  <button onClick={()=>setLang("es")} style={{...pill(lang==="es","#d4001a"),fontSize:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇪🇸</span><span>Español</span></button>
+                  <button onClick={()=>setLang("es")} style={{...pill(lang==="es","#d4001a"),fontSize:isMobile?11:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇪🇸</span><span>Español</span></button>
                   <button onClick={()=>setLang("en")} style={{...pill(lang==="en","#003da5"),fontSize:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇺🇸</span><span>English</span></button>
                 </div>
               </div>
@@ -913,7 +925,7 @@ export default function App() {
             <div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>📊 TABLA DE POSICIONES</div><div style={{fontSize:14,color:"#555",marginTop:2}}>Fase de grupos · 12 grupos</div></div>
             <button onClick={fetchStandings} style={{...pill(false),padding:"8px 14px",borderColor:"#1a6eb5",color:"#6aadff"}}>🔄 Actualizar</button>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":isTablet?"repeat(2,1fr)":"repeat(4,1fr)",gap:12}}>
             {Object.entries(standings).map(([grp,teams])=>(
               <div key={grp} style={{background:"rgba(8,40,80,.85)",border:"1px solid #1a6eb544",borderRadius:12,overflow:"hidden"}}>
                 <div style={{background:"#1a6eb5",padding:"7px 12px",fontSize:14,fontWeight:800,letterSpacing:".15em",color:"#fff"}}>GRUPO {grp}</div>
@@ -1005,7 +1017,7 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:10,marginBottom:12}}>
                 <div style={{background:"rgba(201,168,76,.1)",border:"1px solid #c9a84c33",borderRadius:12,padding:"13px",textAlign:"center"}}>
                   <div style={{fontSize:13,color:"#c9a84c",letterSpacing:".1em",marginBottom:5}}>PREDICCIÓN IA</div>
                   <div style={{fontSize:26,fontWeight:900,color:"#ffd700"}}>{predictResult.score||"1-0"}</div>
@@ -1040,7 +1052,7 @@ export default function App() {
           ):(
             <div>
               <div style={{fontSize:15,color:"#888",marginBottom:12}}>Selecciona un partido de la fase de grupos:</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(255px,1fr))",gap:9,maxHeight:460,overflowY:"auto",paddingRight:4}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(255px,1fr))",gap:9,maxHeight:460,overflowY:"auto",paddingRight:4}}>
                 {MATCHES.filter(m=>m.phase==="Grupos"&&m.home!=="TBD"&&!m.home.includes("°")).map(m=>{
                   const isSelected=predictMatch?.id===m.id;
                   return (
@@ -1123,7 +1135,7 @@ export default function App() {
             <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>🏟️ SEDES DEL MUNDIAL 2026</div>
             <div style={{fontSize:14,color:"#555",marginTop:2}}>16 estadios · 3 países · Toca cada sede para más información</div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":isTablet?"repeat(2,1fr)":"repeat(4,1fr)",gap:16}}>
             {Object.entries(VENUES).map(([name,v])=>{
               const hostInfo=HOST_FILTERS.find(h=>h.key===v.host);
               return (
@@ -1168,7 +1180,7 @@ export default function App() {
               <div style={{fontSize:14,color:"#555",marginTop:12}}>El torneo comienza el 11 de junio · Pulsa "Actualizar scores" para consultar</div>
             </div>
           ):(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(265px,1fr))",gap:12}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":isTablet?"repeat(2,1fr)":"repeat(auto-fill,minmax(265px,1fr))",gap:12}}>
               {liveMatches.map(m=><LiveCard key={m.id} match={m} score={liveScores[m.id]??null} tz={tz} lang={lang} minute={liveMinute[m.id]}/>)}
             </div>
           )}
@@ -1271,7 +1283,7 @@ export default function App() {
               <span style={{marginLeft:"auto",color:"#444",fontSize:10}}>{filtered.length} partidos</span>
             </div>
           </div>
-          <div style={{maxWidth:"100%",margin:"0 auto",padding:"10px 16px 0"}}>
+          <div style={{maxWidth:"100%",margin:"0 auto",padding:isMobile?"8px 10px 0":"10px 16px 0"}}>
             <div style={{display:"flex",gap:0,borderBottom:"1px solid rgba(255,255,255,.07)",marginBottom:10}}>
               {MONTHS.map(m=>(
                 <button key={m.key} onClick={()=>setMonth(m.key)} style={{padding:"8px 20px",border:"none",background:"none",fontFamily:"inherit",fontWeight:700,fontSize:14,letterSpacing:".1em",textTransform:"uppercase",cursor:"pointer",color:month===m.key?"#ffd700":"#555",borderBottom:month===m.key?"3px solid #ffd700":"3px solid transparent",transition:"all .2s"}}>
@@ -1301,7 +1313,7 @@ export default function App() {
                     <div style={{flex:1,height:1,background:"linear-gradient(90deg,rgba(201,168,76,.4),transparent)",marginLeft:6}}/>
                     <div style={{fontSize:12,color:"#444",background:"rgba(255,255,255,.05)",padding:"2px 8px",borderRadius:16}}>{matches.length} PARTIDO{matches.length>1?"S":""}</div>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(265px,1fr))",gap:10}}>
+                  <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":isTablet?"repeat(2,1fr)":"repeat(auto-fill,minmax(265px,1fr))",gap:10}}>
                     {matches.map(m=>{
                       const ps=PHASE_STYLES[m.phase]||PHASE_STYLES["Grupos"];
                       const sc=liveScores[m.id]??null;
