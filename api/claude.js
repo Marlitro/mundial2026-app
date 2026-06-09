@@ -9,7 +9,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { prompt } = req.body;
+    // Vercel auto-parsea JSON, pero por si acaso
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { prompt } = body || {};
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -20,7 +22,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-5",
+        model: "claude-sonnet-4-5",
         max_tokens: 2000,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -30,13 +32,13 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error("Anthropic error:", JSON.stringify(data));
-      return res.status(response.status).json({ error: data });
+      return res.status(200).json({ error: JSON.stringify(data) });
     }
 
     const text = (data.content?.[0]?.text || "").replace(/```json|```/g, "").trim();
     res.status(200).json({ text });
   } catch (e) {
     console.error("Handler error:", e.message);
-    res.status(500).json({ error: e.message });
+    res.status(200).json({ error: e.message });
   }
 }

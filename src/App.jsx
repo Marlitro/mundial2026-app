@@ -744,7 +744,7 @@ export default function App() {
     try {
       const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
       const data=await res.json();
-      if(!res.ok){console.error("API error",res.status,data);onError&&onError(data);return;}
+      if(data.error){console.error("API error:",data.error);onError&&onError(data.error);return;}
       const text=(data.text||"").trim();
       if(!text){onError&&onError("Empty response");return;}
       onSuccess(JSON.parse(text));
