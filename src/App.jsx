@@ -773,12 +773,20 @@ export default function App() {
   },[callAPI]);
 
   const fetchScorers = useCallback(()=>{
-    callAPI(`Top goleadores Mundial FIFA 2026. Hoy: ${new Date().toLocaleDateString("es-ES")}. Solo JSON array máx 10: [{name,team,goals,assists}]. Sin markdown.`,(list)=>{if(list.length>0){setScorers(list);setScorersFetched(true);}});
+    callAPI(
+      `Top goleadores del Mundial FIFA 2026. Hoy: ${new Date().toLocaleDateString("es-ES")}. Responde SOLO con JSON válido sin markdown, máximo 10 jugadores: [{"name":"Nombre Apellido","team":"País","goals":0,"assists":0}]`,
+      (list)=>{if(Array.isArray(list)&&list.length>0){setScorers(list);setScorersFetched(true);}},
+      ()=>{}
+    );
   },[callAPI]);
 
   const fetchNews = useCallback(()=>{
     setNewsLoading(true);
-    callAPI(`Dame los 8 titulares más recientes del Mundial FIFA 2026 en español. Hoy: ${new Date().toLocaleDateString("es-ES")}. Solo JSON array: [{title,source,summary,url,youtubeQuery}]. url puede ser null. Sin markdown.`,(data)=>{if(data.length>0){setNews(data);setNewsFetched(true);}setNewsLoading(false);});
+    callAPI(
+      `Eres un periodista deportivo experto en el Mundial FIFA 2026. Hoy es ${new Date().toLocaleDateString("es-ES")}. Dame 8 titulares de noticias del Mundial 2026 en español (equipos, jugadores, partidos, sedes, curiosidades). Responde SOLO con JSON válido sin markdown: [{"title":"Titular aquí","source":"ESPN","summary":"Resumen de 2 oraciones.","url":null,"youtubeQuery":"busqueda youtube"}]`,
+      (data)=>{if(Array.isArray(data)&&data.length>0){setNews(data);setNewsFetched(true);}setNewsLoading(false);},
+      ()=>{setNewsLoading(false);}
+    );
   },[callAPI]);
 
   const runPredictor = useCallback((match,pick)=>{
