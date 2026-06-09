@@ -739,14 +739,15 @@ export default function App() {
     return {days:Math.floor(diff/86400000),hours:Math.floor((diff%86400000)/3600000),mins:Math.floor((diff%3600000)/60000),secs:Math.floor((diff%60000)/1000),match:nextMatch};
   },[nextMatch,now]);
 
-  // API helper
+  // API helper — proxy through /api/claude (serverless function)
   const callAPI = useCallback(async(prompt,onSuccess)=>{
     try {
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+      const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
+      if(!res.ok){console.error("API error",res.status);return;}
       const data=await res.json();
-      const text=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
+      const text=(data.text||"").trim();
       onSuccess(JSON.parse(text));
-    } catch(e){console.log(e);}
+    } catch(e){console.error("callAPI error",e);}
   },[]);
 
   const fetchLiveScores = useCallback(()=>{
