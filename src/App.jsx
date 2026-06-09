@@ -740,14 +740,15 @@ export default function App() {
   },[nextMatch,now]);
 
   // API helper — proxy through /api/claude (serverless function)
-  const callAPI = useCallback(async(prompt,onSuccess)=>{
+  const callAPI = useCallback(async(prompt,onSuccess,onError)=>{
     try {
       const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
-      if(!res.ok){console.error("API error",res.status);return;}
       const data=await res.json();
+      if(!res.ok){console.error("API error",res.status,data);onError&&onError(data);return;}
       const text=(data.text||"").trim();
+      if(!text){onError&&onError("Empty response");return;}
       onSuccess(JSON.parse(text));
-    } catch(e){console.error("callAPI error",e);}
+    } catch(e){console.error("callAPI error",e);onError&&onError(e.message);}
   },[]);
 
   const fetchLiveScores = useCallback(()=>{
@@ -783,7 +784,11 @@ export default function App() {
   const runPredictor = useCallback((match,pick)=>{
     setPredictView("loading");
     const pickLabel=pick==="home"?match.home:pick==="away"?match.away:"Empate";
-    callAPI(`Eres analista experto del Mundial FIFA 2026. Analiza: ${match.home} vs ${match.away} (Grupo ${match.group||match.phase}, ${match.date}, ${match.venue}). El usuario predice: ${pickLabel}. Responde SOLO con JSON: {homeProb,drawProb,awayProb,factors,homePlayer,awayPlayer,prediction,score,userCorrect,summary}. Sin markdown.`,(data)=>{setPredictResult(data);setPredictView("result");});
+    callAPI(
+      `Eres analista experto del Mundial FIFA 2026. Analiza: ${match.home} vs ${match.away} (Grupo ${match.group||match.phase}, ${match.date}, ${match.venue}). El usuario predice: ${pickLabel}. Responde SOLO con JSON válido sin markdown: {"homeProb":50,"drawProb":25,"awayProb":25,"factors":["factor1","factor2","factor3"],"homePlayer":"Nombre","awayPlayer":"Nombre","prediction":"Local gana","score":"2-1","userCorrect":true,"summary":"Análisis breve"}`,
+      (data)=>{setPredictResult(data);setPredictView("result");},
+      (err)=>{console.error("Predictor error:",err);setPredictView("error");}
+    );
   },[callAPI]);
 
   // Auto-refresh (after fetch fns are defined)
@@ -1016,6 +1021,13 @@ export default function App() {
               <div style={{fontSize:48,marginBottom:14}}>🔮</div>
               <div style={{fontSize:14,color:"#c9a84c",fontWeight:700,letterSpacing:".1em",marginBottom:6}}>ANALIZANDO CON IA...</div>
               <div style={{fontSize:15,color:"#555"}}>Claude evalúa estadísticas, forma y contexto del partido</div>
+            </div>
+          ):predictView==="error"?(
+            <div style={{textAlign:"center",padding:"60px 20px"}}>
+              <div style={{fontSize:48,marginBottom:14}}>⚠️</div>
+              <div style={{fontSize:16,color:"#ff7a00",fontWeight:700,marginBottom:8}}>Error al conectar con la IA</div>
+              <div style={{fontSize:14,color:"#555",marginBottom:20}}>Verifica tu conexión e intenta de nuevo</div>
+              <button onClick={()=>{setPredictView("pick");setPredictMatch(null);setPredictPick(null);}} style={{padding:"12px 24px",borderRadius:10,border:"1px solid #c9a84c",background:"rgba(201,168,76,.15)",color:"#ffd700",fontFamily:"inherit",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Intentar de nuevo</button>
             </div>
           ):(
             <div>
