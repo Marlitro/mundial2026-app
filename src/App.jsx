@@ -1749,7 +1749,7 @@ export default function App() {
                   <div style={{height:190,overflow:"hidden",background:"#0a1628",position:"relative"}}>
                     <img src={v.img} alt={name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:.85}} onError={e=>{e.target.style.display="none";}}/>
                     <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(8,20,55,.95) 0%,transparent 50%)"}}/>
-                    {hostInfo&&<span style={{position:"absolute",top:10,left:10,fontSize:12,background:`${hostInfo.color}dd`,color:"#fff",padding:"3px 8px",borderRadius:5,fontWeight:700}}>{hostInfo.label}</span>}
+                    {hostInfo&&<span style={{position:"absolute",top:10,left:10,fontSize:12,background:"rgba(201,168,76,.92)",color:"#0a1628",padding:"3px 9px",borderRadius:5,fontWeight:800,letterSpacing:".03em"}}>{hostInfo.label}</span>}
                     <div style={{position:"absolute",bottom:12,left:14,right:14}}>
                       <div style={{fontSize:17,fontWeight:800,color:"#fff",lineHeight:1.2,textShadow:"0 1px 6px rgba(0,0,0,.9)"}}>{name}</div>
                       <div style={{fontSize:13,color:"#ddd",marginTop:3,textShadow:"0 1px 4px rgba(0,0,0,.8)"}}>📍 {v.city}</div>
