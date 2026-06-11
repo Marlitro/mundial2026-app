@@ -1028,17 +1028,24 @@ export default function App() {
 
   const countdown = useMemo(()=>{
     if(!nextMatch) return null;
-    const etStr=nextMatch.et.replace("†","").trim();
-    const parts=etStr.split(" ");
-    const ampm=parts[1]; const [hS,mS]=parts[0].split(":");
-    let h=parseInt(hS);
+    // Parse the time for the selected timezone
+    const tzOffsets = {et:0, ct:-1, mt:-2, pt:-3};
+    const tzStr = nextMatch[tz]?.replace("†","").trim() || nextMatch.et.replace("†","").trim();
+    const parts = tzStr.split(" ");
+    const ampm = parts[1]; const [hS,mS] = parts[0].split(":");
+    let h = parseInt(hS);
     if(ampm==="PM"&&h!==12) h+=12;
     if(ampm==="AM"&&h===12) h=0;
-    const target=new Date(`${nextMatch.date}T${String(h).padStart(2,"0")}:${mS||"00"}:00`);
-    const diff=target-now;
+    // Build target date in local wall-clock time of selected timezone
+    // ET = UTC-5 (EST) or UTC-4 (EDT during summer/tournament). Tournament is summer → EDT = UTC-4
+    const tzUTCOffset = {et:-4, ct:-5, mt:-6, pt:-7};
+    const utcOffset = tzUTCOffset[tz] ?? -4;
+    const localDateStr = `${nextMatch.date}T${String(h).padStart(2,"0")}:${mS||"00"}:00`;
+    const target = new Date(`${localDateStr}${utcOffset>=0?"+":""}${String(utcOffset).padStart(3,"0")}:00`);
+    const diff = target - now;
     if(diff<=0) return null;
     return {days:Math.floor(diff/86400000),hours:Math.floor((diff%86400000)/3600000),mins:Math.floor((diff%3600000)/60000),secs:Math.floor((diff%60000)/1000),match:nextMatch};
-  },[nextMatch,now]);
+  },[nextMatch,now,tz]);
 
   // API helper — proxy through /api/claude (serverless function)
   const callAPI = useCallback(async(prompt,onSuccess,onError)=>{
