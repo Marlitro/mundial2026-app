@@ -273,61 +273,15 @@ const TEAM_META = {
   "Inglaterra":{code:"gb-eng",grp:"L"},"Croacia":{code:"hr",grp:"L"},"Ghana":{code:"gh",grp:"L"},"Panamá":{code:"pa",grp:"L"},
 };
 
-const SVG_FLAGS = {
-  mx:<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#006847"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce1126"/></svg>,
-  za:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#007a4d"/><polygon points="0,0 1.1,1 0,2" fill="#000"/><polygon points="0,0.25 0.85,1 0,1.75" fill="#ffb612"/><rect y="0.87" width="3" height="0.26" fill="#fff"/><rect y="0.92" width="3" height="0.16" fill="#de3831"/></svg>,
-  kr:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><circle cx="1.5" cy="1" r="0.5" fill="#cd2e3a"/><path d="M1.5,0.5 A0.5,0.5 0 0,1 1.5,1.5" fill="#003478"/></svg>,
-  cz:<svg viewBox="0 0 3 2"><rect width="3" height="1" fill="#fff"/><rect y="1" width="3" height="1" fill="#d7141a"/><polygon points="0,0 1.4,1 0,2" fill="#11457e"/></svg>,
-  ca:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><rect width="0.75" height="2" fill="#d52b1e"/><rect x="2.25" width="0.75" height="2" fill="#d52b1e"/><polygon points="1.5,0.5 1.62,0.86 1.98,0.86 1.7,1.06 1.8,1.42 1.5,1.22 1.2,1.42 1.3,1.06 1.02,0.86 1.38,0.86" fill="#d52b1e"/></svg>,
-  ba:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#002395"/><polygon points="0.6,0 2.6,2 0.6,2" fill="#FFCD00"/></svg>,
-  qa:<svg viewBox="0 0 3 2"><rect width="0.9" height="2" fill="#fff"/><rect x="0.9" width="2.1" height="2" fill="#8D1B3D"/></svg>,
-  ch:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#FF0000"/><rect x="1.3" y="0.5" width="0.4" height="1" fill="#fff"/><rect x="1" y="0.8" width="1" height="0.4" fill="#fff"/></svg>,
-  br:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#009c3b"/><polygon points="1.5,0.25 2.85,1 1.5,1.75 0.15,1" fill="#FFDF00"/><circle cx="1.5" cy="1" r="0.32" fill="#002776"/></svg>,
-  ma:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#c1272d"/><polygon points="1.5,0.55 1.6,0.9 1.95,0.9 1.68,1.1 1.78,1.45 1.5,1.26 1.22,1.45 1.32,1.1 1.05,0.9 1.4,0.9" fill="none" stroke="#006233" strokeWidth="0.06"/></svg>,
-  ht:<svg viewBox="0 0 3 2"><rect width="3" height="1" fill="#00209F"/><rect y="1" width="3" height="1" fill="#D21034"/></svg>,
-  "gb-sct":<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#003078"/><line x1="0" y1="0" x2="3" y2="2" stroke="#fff" strokeWidth="0.5"/><line x1="3" y1="0" x2="0" y2="2" stroke="#fff" strokeWidth="0.5"/></svg>,
-  us:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#B22234"/><rect y="0.15" width="3" height="0.15" fill="#fff"/><rect y="0.46" width="3" height="0.15" fill="#fff"/><rect y="0.77" width="3" height="0.15" fill="#fff"/><rect y="1.08" width="3" height="0.15" fill="#fff"/><rect y="1.38" width="3" height="0.15" fill="#fff"/><rect y="1.69" width="3" height="0.15" fill="#fff"/><rect width="1.2" height="1.08" fill="#3C3B6E"/></svg>,
-  py:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#D52B1E"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#0038A8"/></svg>,
-  au:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#00008B"/><line x1="0" y1="0" x2="0.9" y2="0.6" stroke="#fff" strokeWidth="0.2"/><line x1="0.9" y1="0" x2="0" y2="0.6" stroke="#fff" strokeWidth="0.2"/><line x1="0.45" y1="0" x2="0.45" y2="0.6" stroke="#fff" strokeWidth="0.12"/><line x1="0" y1="0.3" x2="0.9" y2="0.3" stroke="#fff" strokeWidth="0.12"/><line x1="0" y1="0" x2="0.9" y2="0.6" stroke="#CC0001" strokeWidth="0.08"/><line x1="0.9" y1="0" x2="0" y2="0.6" stroke="#CC0001" strokeWidth="0.08"/></svg>,
-  tr:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#E30A17"/><circle cx="1.25" cy="1" r="0.42" fill="#fff"/><circle cx="1.45" cy="1" r="0.33" fill="#E30A17"/></svg>,
-  de:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#000"/><rect y="0.667" width="3" height="0.667" fill="#D00"/><rect y="1.333" width="3" height="0.667" fill="#FFCE00"/></svg>,
-  cw:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#002B7F"/><rect y="1.3" width="3" height="0.5" fill="#F9E814"/><circle cx="0.55" cy="0.65" r="0.18" fill="#fff"/><circle cx="0.95" cy="0.5" r="0.13" fill="#fff"/></svg>,
-  ci:<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#F77F00"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#009A44"/></svg>,
-  ec:<svg viewBox="0 0 3 2"><rect width="3" height="0.8" fill="#FFD100"/><rect y="0.8" width="3" height="0.6" fill="#003087"/><rect y="1.4" width="3" height="0.6" fill="#D60000"/></svg>,
-  nl:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#AE1C28"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#21468B"/></svg>,
-  jp:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><circle cx="1.5" cy="1" r="0.6" fill="#BC002D"/></svg>,
-  tn:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#E70013"/><circle cx="1.5" cy="1" r="0.55" fill="#fff"/><circle cx="1.5" cy="1" r="0.42" fill="#E70013"/></svg>,
-  se:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#006AA7"/><rect x="0.9" width="0.28" height="2" fill="#FECC02"/><rect y="0.86" width="3" height="0.28" fill="#FECC02"/></svg>,
-  be:<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#000"/><rect x="1" width="1" height="2" fill="#FAE042"/><rect x="2" width="1" height="2" fill="#EF3340"/></svg>,
-  eg:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#CE1126"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#000"/></svg>,
-  ir:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#239F40"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#DA0000"/></svg>,
-  nz:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#00247D"/><line x1="0" y1="0" x2="0.9" y2="0.6" stroke="#fff" strokeWidth="0.2"/><line x1="0.9" y1="0" x2="0" y2="0.6" stroke="#fff" strokeWidth="0.2"/><line x1="0.45" y1="0" x2="0.45" y2="0.6" stroke="#fff" strokeWidth="0.12"/><line x1="0" y1="0.3" x2="0.9" y2="0.3" stroke="#fff" strokeWidth="0.12"/><line x1="0" y1="0" x2="0.9" y2="0.6" stroke="#CC0001" strokeWidth="0.08"/><line x1="0.9" y1="0" x2="0" y2="0.6" stroke="#CC0001" strokeWidth="0.08"/></svg>,
-  es:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#c60b1e"/><rect y="0.5" width="3" height="1" fill="#ffc400"/></svg>,
-  cv:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#003893"/><rect y="1.1" width="3" height="0.5" fill="#fff"/><rect y="1.25" width="3" height="0.2" fill="#CF2027"/></svg>,
-  sa:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#006C35"/></svg>,
-  uy:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><rect y="0.222" width="3" height="0.222" fill="#74ACDF"/><rect y="0.667" width="3" height="0.222" fill="#74ACDF"/><rect y="1.111" width="3" height="0.222" fill="#74ACDF"/><rect y="1.556" width="3" height="0.222" fill="#74ACDF"/><circle cx="0.6" cy="1" r="0.3" fill="#FCD116"/></svg>,
-  fr:<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#002395"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ED2939"/></svg>,
-  sn:<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#00853F"/><rect x="1" width="1" height="2" fill="#FDEF42"/><rect x="2" width="1" height="2" fill="#E31B23"/><polygon points="1.5,0.7 1.58,0.94 1.84,0.94 1.63,1.09 1.71,1.33 1.5,1.18 1.29,1.33 1.37,1.09 1.16,0.94 1.42,0.94" fill="#00853F"/></svg>,
-  iq:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#CE1126"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#000"/></svg>,
-  no:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#EF2B2D"/><rect x="0.88" width="0.24" height="2" fill="#fff"/><rect y="0.88" width="3" height="0.24" fill="#fff"/><rect x="0.94" width="0.12" height="2" fill="#002868"/><rect y="0.94" width="3" height="0.12" fill="#002868"/></svg>,
-  ar:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#74ACDF"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#74ACDF"/><circle cx="1.5" cy="1" r="0.24" fill="#F6B40E"/></svg>,
-  dz:<svg viewBox="0 0 3 2"><rect width="1.5" height="2" fill="#006233"/><rect x="1.5" width="1.5" height="2" fill="#fff"/><circle cx="1.65" cy="1" r="0.38" fill="#D21034"/><circle cx="1.8" cy="1" r="0.28" fill="#fff"/></svg>,
-  at:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#ED2939"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#ED2939"/></svg>,
-  jo:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#007A3D"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#000"/><polygon points="0,0 1.2,1 0,2" fill="#CE1126"/></svg>,
-  pt:<svg viewBox="0 0 3 2"><rect width="1.2" height="2" fill="#006600"/><rect x="1.2" width="1.8" height="2" fill="#FF0000"/><circle cx="1.2" cy="1" r="0.38" fill="#FFD700" stroke="#fff" strokeWidth="0.04"/></svg>,
-  cd:<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#007FFF"/><line x1="0" y1="2" x2="3" y2="0" stroke="#F7D618" strokeWidth="0.3"/><rect width="3" height="0.4" fill="#CE1021"/><rect y="1.6" width="3" height="0.4" fill="#CE1021"/></svg>,
-  uz:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#1EB53A"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#CE1126"/></svg>,
-  co:<svg viewBox="0 0 3 2"><rect width="3" height="0.8" fill="#FCD116"/><rect y="0.8" width="3" height="0.6" fill="#003087"/><rect y="1.4" width="3" height="0.6" fill="#CE1126"/></svg>,
-  "gb-eng":<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><rect x="1.3" width="0.4" height="2" fill="#CF142B"/><rect y="0.8" width="3" height="0.4" fill="#CF142B"/></svg>,
-  hr:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#FF0000"/><rect y="0.667" width="3" height="0.667" fill="#fff"/><rect y="1.333" width="3" height="0.667" fill="#0000FF"/></svg>,
-  gh:<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#006B3F"/><rect y="0.667" width="3" height="0.667" fill="#FCD116"/><rect y="1.333" width="3" height="0.667" fill="#EF3340"/><polygon points="1.5,0.65 1.6,0.95 1.9,0.95 1.67,1.12 1.76,1.42 1.5,1.25 1.24,1.42 1.33,1.12 1.1,0.95 1.4,0.95" fill="#000"/></svg>,
-  pa:<svg viewBox="0 0 3 2"><rect width="1.5" height="1" fill="#fff"/><rect x="1.5" width="1.5" height="1" fill="#D21034"/><rect y="1" width="1.5" height="1" fill="#005293"/><rect x="1.5" y="1" width="1.5" height="1" fill="#fff"/></svg>,
-};
-
-// Banderas que usamos imagen del CDN (escudo complejo)
-const CDN_FLAGS = {
-  mx:"mx", ar:"ar", br:"br", ca:"ca", us:"us", de:"de",
-  es:"es", fr:"fr", pt:"pt", gb:"gb", it:"it",
+// Todas las banderas usan flagcdn.com — imágenes oficiales con escudos completos
+const FLAG_CDN = {
+  "mx":"mx","za":"za","kr":"kr","cz":"cz","ca":"ca","ba":"ba","qa":"qa","ch":"ch",
+  "br":"br","ma":"ma","ht":"ht","gb-sct":"gb-sct","us":"us","py":"py","au":"au",
+  "tr":"tr","de":"de","cw":"cw","ci":"ci","ec":"ec","nl":"nl","jp":"jp","tn":"tn",
+  "se":"se","be":"be","eg":"eg","ir":"ir","nz":"nz","es":"es","cv":"cv","sa":"sa",
+  "uy":"uy","fr":"fr","sn":"sn","iq":"iq","no":"no","ar":"ar","dz":"dz","at":"at",
+  "jo":"jo","pt":"pt","cd":"cd","uz":"uz","co":"co","gb-eng":"gb-eng","hr":"hr",
+  "gh":"gh","pa":"pa",
 };
 
 const Flag = ({team, size=44}) => {
@@ -336,27 +290,19 @@ const Flag = ({team, size=44}) => {
 
   const h = Math.round(size*0.67);
   const code = meta.code;
+  const cdnCode = FLAG_CDN[code] || code;
+  const w = Math.max(size*2, 80);
 
-  // México y otros con escudo complejo — imagen real desde flagcdn.com
-  if(code==="mx"){
-    return (
-      <div style={{width:size,height:h,borderRadius:3,overflow:"hidden",boxShadow:"0 2px 5px rgba(0,0,0,.5)",flexShrink:0}}>
-        <img
-          src={`https://flagcdn.com/w${Math.max(size*2,80)}/mx.png`}
-          alt="México"
-          width={size}
-          height={h}
-          style={{display:"block",width:size,height:h,objectFit:"cover"}}
-        />
-      </div>
-    );
-  }
-
-  const svg = SVG_FLAGS[code];
-  if (!svg) return <div style={{width:size,height:h,background:"#1a2a3a",borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#555"}}>?</div>;
   return (
     <div style={{width:size,height:h,borderRadius:3,overflow:"hidden",boxShadow:"0 2px 5px rgba(0,0,0,.5)",flexShrink:0}}>
-      {React.cloneElement(svg,{width:size,height:h,style:{display:"block"}})}
+      <img
+        src={`https://flagcdn.com/w${w}/${cdnCode}.png`}
+        alt={team}
+        width={size}
+        height={h}
+        style={{display:"block",width:size,height:h,objectFit:"cover"}}
+        onError={e=>{e.target.style.display="none";}}
+      />
     </div>
   );
 };
