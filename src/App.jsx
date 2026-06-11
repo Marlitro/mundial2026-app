@@ -1375,7 +1375,7 @@ export default function App() {
             <>
               {/* Fila 1: logo + título + badge */}
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                <span style={{fontSize:22,lineHeight:1,flexShrink:0}}>⚽</span>
+                <img src="/logo.png" alt="Mundial 2026" style={{width:44,height:44,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
                 <div style={{minWidth:0,flex:1}}>
                   <div style={{fontSize:"clamp(17px,5.5vw,22px)",fontWeight:900,letterSpacing:".1em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
                   {/* Subtítulo en 2 líneas si no cabe — sin cortar */}
@@ -1404,7 +1404,7 @@ export default function App() {
             /* ── Desktop/Tablet layout: todo en una fila ── */
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <span style={{fontSize:32,lineHeight:1}}>⚽</span>
+                <img src="/logo.png" alt="Mundial 2026" style={{width:52,height:52,borderRadius:10,objectFit:"cover",flexShrink:0}}/>
                 <div>
                   <div style={{fontSize:"clamp(16px,3.2vw,26px)",fontWeight:900,letterSpacing:".12em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
                   <div style={{fontSize:12,color:"#c9a84c",letterSpacing:".15em"}}>GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá · 11 Jun – 19 Jul</div>
