@@ -72,10 +72,10 @@ export default function TouristGuide({ initialVenue, isMobile, onShowPricing, pr
         .peek-blur { filter: blur(${peekDone ? "5px" : "0px"}); transition: filter .6s ease; pointer-events: ${peekDone && !hasAccess ? "none" : "auto"}; user-select: ${peekDone && !hasAccess ? "none" : "auto"}; }
       `}</style>
 
-      {/* ── Overlay backdrop (fades in after peek) ── */}
-      {!hasAccess && peekDone && (
+      {/* ── Overlay backdrop — click to dismiss ── */}
+      {!hasAccess && peekDone && showOffer && (
         <div
-          onClick={() => onShowPricing?.("vip")}
+          onClick={() => setShowOffer(false)}
           style={{
             position:"fixed", inset:0, zIndex:40,
             background:"rgba(1,10,26,.55)",
@@ -95,8 +95,19 @@ export default function TouristGuide({ initialVenue, isMobile, onShowPricing, pr
           animation:`slideUp ${SLIDE_MS}ms cubic-bezier(.22,.61,.36,1) forwards`,
           boxShadow:"0 -8px 40px rgba(0,0,0,.7)",
         }}>
-          {/* Handle */}
-          <div style={{ width:42, height:4, background:"rgba(255,255,255,.2)", borderRadius:2, margin:"0 auto 18px" }}/>
+          {/* Handle + close */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", position:"relative", marginBottom:18 }}>
+            <div style={{ width:42, height:4, background:"rgba(255,255,255,.2)", borderRadius:2 }}/>
+            <button
+              onClick={() => setShowOffer(false)}
+              style={{
+                position:"absolute", right:0, top:-8,
+                background:"rgba(255,255,255,.08)", border:"none",
+                borderRadius:20, width:32, height:32,
+                color:"#aaa", fontSize:18, cursor:"pointer",
+                display:"flex", alignItems:"center", justifyContent:"center",
+              }}>✕</button>
+          </div>
 
           <div style={{ textAlign:"center", marginBottom:16 }}>
             <div style={{ fontSize:32, marginBottom:6 }}>🗺️🔒</div>
@@ -135,15 +146,15 @@ export default function TouristGuide({ initialVenue, isMobile, onShowPricing, pr
             🛒 Ver planes y precios
           </button>
 
-          {/* Code input shortcut */}
+          {/* Dismiss — continue free */}
           <button
-            onClick={() => { setShowOffer(false); onShowPricing?.("vip"); }}
+            onClick={() => setShowOffer(false)}
             style={{
-              width:"100%", padding:"11px", borderRadius:10, border:"1px solid #333",
-              background:"transparent", color:"#666",
+              width:"100%", padding:"11px", borderRadius:10, border:"1px solid #1a3a5c",
+              background:"transparent", color:"#556",
               fontFamily:"inherit", fontSize:13, cursor:"pointer",
             }}>
-            🔑 ¿Ya tienes código? Actívalo aquí
+            Continuar con versión gratuita
           </button>
         </div>
       )}
