@@ -44,9 +44,9 @@ export const TIER_ACCESS = {
 };
 
 export const GUMROAD = {
-  pro:      "https://marcosmundial.gumroad.com/l/fanpro",
-  vip:      "https://marcosmundial.gumroad.com/l/fanvip",
-  ultimate: "https://marcosmundial.gumroad.com/l/fanultimate",
+  pro:      "https://marlitro.gumroad.com/l/fanpro",
+  vip:      "https://marlitro.gumroad.com/l/fanvip",
+  ultimate: "https://marlitro.gumroad.com/l/fanultimate",
 };
 
 // ── Storage keys ───────────────────────────────────────────────────────────
