@@ -535,7 +535,9 @@ const genCode = () => {
   return "MUN26-"+Array.from({length:5},()=>c[Math.floor(Math.random()*c.length)]).join("");
 };
 
-const QuinielaSystem = ({tz}) => {
+const TEAM_EMOJI = {"México":"🇲🇽","EE.UU.":"🇺🇸","Canadá":"🇨🇦","Argentina":"🇦🇷","Brasil":"🇧🇷","Francia":"🇫🇷","España":"🇪🇸","Inglaterra":"🇬🇧","Alemania":"🇩🇪","Portugal":"🇵🇹","Países Bajos":"🇳🇱","Bélgica":"🇧🇪","Croacia":"🇭🇷","Uruguay":"🇺🇾","Colombia":"🇨🇴","Ecuador":"🇪🇨","Corea del Sur":"🇰🇷","Japón":"🇯🇵","Marruecos":"🇲🇦","Senegal":"🇸🇳","Ghana":"🇬🇭","Costa de Marfil":"🇨🇮","Sudáfrica":"🇿🇦","Egipto":"🇪🇬","Túnez":"🇹🇳","Argelia":"🇩🇿","Suiza":"🇨🇭","Suecia":"🇸🇪","Noruega":"🇳🇴","Austria":"🇦🇹","Chequia":"🇨🇿","Polonia":"🇵🇱","Turquía":"🇹🇷","Arabia Saudita":"🇸🇦","Irán":"🇮🇷","Irak":"🇮🇶","Qatar":"🇶🇦","Australia":"🇦🇺","Nueva Zelanda":"🇳🇿","Paraguay":"🇵🇾","Panamá":"🇵🇦","Haití":"🇭🇹","Bolivia":"🇧🇴","Escocia":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Bosnia y Herz.":"🇧🇦","Congo DR":"🇨🇩","Cabo Verde":"🇨🇻","Curazao":"🇨🇼","Uzbekistán":"🇺🇿","Jordania":"🇯🇴","Ghana":"🇬🇭","Panamá":"🇵🇦"};
+
+const QuinielaSystem = ({tz, onShowPricing, premiumTier}) => {
   const [screen, setScreen] = useState("welcome");
   const [userName, setUserName] = useState("");
   const [joinCode, setJoinCode] = useState("");
@@ -620,11 +622,50 @@ const QuinielaSystem = ({tz}) => {
   // ── WELCOME ──
   if(screen==="welcome") return (
     <div style={{padding:"10px 0"}}>
-      <div style={{textAlign:"center",marginBottom:20}}>
+      <div style={{textAlign:"center",marginBottom:16}}>
         <div style={{fontSize:48,marginBottom:8}}>🎯</div>
         <div style={{fontSize:20,fontWeight:900,color:"#fff"}}>QUINIELA MUNDIAL 2026</div>
         <div style={{fontSize:15,color:"#666",marginTop:4}}>Predice, compite y gana contra tus amigos y el mundo</div>
       </div>
+
+      {/* Modos de juego */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+        <div style={{background:"rgba(8,40,80,.7)",border:"1px solid #1a6eb533",borderRadius:12,padding:"14px 12px"}}>
+          <div style={{fontSize:22,marginBottom:6}}>🙋</div>
+          <div style={{fontSize:14,fontWeight:800,color:"#fff",marginBottom:4}}>Modo Solo</div>
+          <div style={{fontSize:12,color:"#666",lineHeight:1.5}}>Haz tus picks, acumula puntos y aparece en la tabla global con jugadores de todo el mundo.</div>
+          <div style={{marginTop:8,fontSize:12,color:"#00a651",fontWeight:700}}>✅ Gratis</div>
+        </div>
+        <div style={{background:"linear-gradient(135deg,rgba(201,168,76,.15),rgba(8,40,80,.8))",border:"1.5px solid #c9a84c55",borderRadius:12,padding:"14px 12px",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,right:0,background:"#c9a84c",color:"#000",fontSize:10,fontWeight:900,padding:"2px 8px",borderRadius:"0 12px 0 8px"}}>⭐ PRO</div>
+          <div style={{fontSize:22,marginBottom:6}}>👥</div>
+          <div style={{fontSize:14,fontWeight:800,color:"#ffd700",marginBottom:4}}>Grupo Privado</div>
+          <div style={{fontSize:12,color:"#a0b0c8",lineHeight:1.5}}>Crea tu grupo, invita a tus amigos con un código único y lleva el ranking entre todos.</div>
+          {(!premiumTier||premiumTier==="free")?(
+            <button onClick={()=>onShowPricing?.("pro")} style={{marginTop:8,width:"100%",padding:"7px",borderRadius:7,border:"none",background:"linear-gradient(90deg,#c9a84c,#ffd700)",color:"#000",fontFamily:"inherit",fontSize:12,fontWeight:900,cursor:"pointer"}}>Activar por $0.99 →</button>
+          ):(
+            <div style={{marginTop:8,fontSize:12,color:"#00a651",fontWeight:700}}>✅ Activo en tu plan</div>
+          )}
+        </div>
+      </div>
+
+      {/* CTA de grupo privado */}
+      <div style={{background:"rgba(201,168,76,.07)",border:"1px solid #c9a84c33",borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+        <div style={{fontSize:13,fontWeight:800,color:"#ffd700",marginBottom:6}}>¿Quieres armar la quiniela con tus amistades? 🏆</div>
+        <div style={{fontSize:12,color:"#a0b0c8",lineHeight:1.6,marginBottom:10}}>
+          Con <strong style={{color:"#ffd700"}}>Fan Pro</strong> creas tu grupo privado, compartes un código con tu grupo de WhatsApp y todos siguen el ranking en tiempo real. Ideal para la oficina, familia o peña futbolera.
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {[["📊","Ranking privado"],["🔗","Código único"],["📱","Compartir por WhatsApp"],["🔄","Actualización en vivo"]].map(([icon,label])=>(
+            <div key={label} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(255,255,255,.05)",borderRadius:6,padding:"4px 8px",fontSize:11,color:"#aaa"}}>
+              <span>{icon}</span><span>{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sistema de puntos */}
+      <div style={{fontSize:13,color:"#888",letterSpacing:".1em",fontWeight:700,marginBottom:8}}>SISTEMA DE PUNTOS</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:18}}>
         {[{icon:"⭐",pts:"3 pts",label:"Marcador exacto"},{icon:"✅",pts:"1 pt",label:"Resultado correcto"},{icon:"❌",pts:"0 pts",label:"Fallo"},{icon:"🏆",pts:"TOP",label:"Tabla global"}].map(({icon,pts,label})=>(
           <div key={label} style={{background:"rgba(8,40,80,.6)",border:"1px solid #1a6eb533",borderRadius:10,padding:"10px",textAlign:"center"}}>
@@ -760,7 +801,14 @@ const QuinielaSystem = ({tz}) => {
           ))}
         </div>
       )}
-      <button onClick={()=>loadGroup(groupCode)} style={{width:"100%",marginTop:12,padding:"11px",borderRadius:8,border:"1px solid #1a6eb5",background:"rgba(26,110,181,.15)",color:"#6aadff",fontFamily:"inherit",fontSize:15,fontWeight:700,cursor:"pointer"}}>🔄 Actualizar tabla</button>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:12}}>
+        <button onClick={()=>loadGroup(groupCode)} style={{padding:"11px",borderRadius:8,border:"1px solid #1a6eb5",background:"rgba(26,110,181,.15)",color:"#6aadff",fontFamily:"inherit",fontSize:14,fontWeight:700,cursor:"pointer"}}>🔄 Actualizar</button>
+        <button onClick={()=>{
+          const lines = groupMembers.map((m,i)=>`${i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`} ${m.name}${m.myCode===myCode?" 👈":""} — ${m.pts} pts`);
+          const text = `🏆 RANKING QUINIELA MUNDIAL 2026\nGrupo: ${groupCode}\n\n${lines.join("\n")}\n\n⚽ Únete en: mundial2026-app-theta.vercel.app`;
+          if(navigator.share){navigator.share({text});}else{navigator.clipboard.writeText(text);alert("¡Ranking copiado! Pégalo donde quieras 📋");}
+        }} style={{padding:"11px",borderRadius:8,border:"1px solid #25d366",background:"rgba(37,211,102,.12)",color:"#25d366",fontFamily:"inherit",fontSize:14,fontWeight:700,cursor:"pointer"}}>📤 Compartir</button>
+      </div>
     </div>
   );
 
@@ -814,7 +862,9 @@ const ShareCard = ({match, tz, lang, onClose}) => {
   const canal = lang==="es"?match.esCanal:match.enCanal;
   const time = match[tz];
   const tzLabel = TIMEZONES.find(t=>t.key===tz)?.label||"ET";
-  const text = `⚽ #Mundial2026\n${match.home} 🆚 ${match.away}\n📅 ${match.date} · ${time} ${tzLabel}\n🏟️ ${match.venue}, ${match.city}\n📺 ${canal}\n\n¡No te lo pierdas! 🔥`;
+  const hFlag = TEAM_EMOJI[match.home]||"⚽";
+  const aFlag = TEAM_EMOJI[match.away]||"⚽";
+  const text = `⚽ #Mundial2026\n${hFlag} ${match.home} 🆚 ${match.away} ${aFlag}\n📅 ${match.date} · ${time} ${tzLabel}\n🏟️ ${match.venue}, ${match.city}\n📺 ${canal}\n\n¡No te lo pierdas! 🔥`;
   const ps = PHASE_STYLES[match.phase]||PHASE_STYLES["Grupos"];
   const hostInfo = HOST_FILTERS.find(h=>h.key===match.host);
   return (
@@ -1607,9 +1657,15 @@ export default function App() {
               </div>
               <div style={{background:"rgba(8,40,80,.6)",border:"1px solid #1a6eb533",borderRadius:12,padding:"14px",marginBottom:12}}>
                 <div style={{fontSize:13,fontWeight:700,color:"#888",letterSpacing:".1em",marginBottom:10}}>PROBABILIDADES</div>
-                {[{label:predictMatch.home,prob:predictResult.homeProb,color:"#1a6eb5"},{label:"Empate",prob:predictResult.drawProb,color:"#888"},{label:predictMatch.away,prob:predictResult.awayProb,color:"#c9a84c"}].map(({label,prob,color})=>(
+                {[{label:predictMatch.home,prob:predictResult.homeProb,color:"#1a6eb5",flag:predictMatch.home},{label:"Empate",prob:predictResult.drawProb,color:"#888",flag:null},{label:predictMatch.away,prob:predictResult.awayProb,color:"#c9a84c",flag:predictMatch.away}].map(({label,prob,color,flag})=>(
                   <div key={label} style={{marginBottom:10}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:14,color:"#ccc"}}>{label}</span><span style={{fontSize:15,fontWeight:800,color}}>{prob}%</span></div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+                      <div style={{display:"flex",alignItems:"center",gap:7}}>
+                        {flag?<Flag team={flag} size={20}/>:<span style={{fontSize:16}}>🤝</span>}
+                        <span style={{fontSize:14,color:"#ccc"}}>{label}</span>
+                      </div>
+                      <span style={{fontSize:15,fontWeight:800,color}}>{prob}%</span>
+                    </div>
                     <div style={{height:7,background:"rgba(255,255,255,.08)",borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:`${prob}%`,background:color,borderRadius:4}}/></div>
                   </div>
                 ))}
@@ -1689,7 +1745,7 @@ export default function App() {
       {/* ── QUINIELA ── */}
       {view==="quiniela"&&(
         <div style={{maxWidth:700,margin:"20px auto",padding:"0 16px 60px"}}>
-          <QuinielaSystem tz={tz}/>
+          <QuinielaSystem tz={tz} onShowPricing={openPricing} premiumTier={premiumTier}/>
         </div>
       )}
 
