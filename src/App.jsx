@@ -1,4 +1,261 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import TouristGuide from "./components/TouristGuide.jsx";
+import PricingModal from "./components/PricingModal.jsx";
+import PremiumBadge from "./components/PremiumBadge.jsx";
+import { checkPremium, canUseIa, recordIaUse, getIaUsage } from "./utils/premium.js";
+
+// ── GOAL CELEBRATION ANIMATION ────────────────────────────────────────────────
+const KOFI_CSS = `
+@keyframes kofiSlideIn {
+  0%   { transform: translateY(120px); opacity:0; }
+  100% { transform: translateY(0);     opacity:1; }
+}
+@keyframes kofiPulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(201,168,76,.35); }
+  50%      { box-shadow: 0 4px 28px rgba(201,168,76,.65); }
+}
+`;
+
+const GOAL_CSS = `
+@keyframes goalBallDrop {
+  0%   { transform: translateY(-120px) scale(.6) rotate(-20deg); opacity:0; }
+  60%  { transform: translateY(10px)   scale(1.15) rotate(8deg);  opacity:1; }
+  80%  { transform: translateY(-18px)  scale(.95) rotate(-4deg); }
+  100% { transform: translateY(0)      scale(1)   rotate(0deg);  opacity:1; }
+}
+@keyframes goalTextPop {
+  0%   { transform: scale(0) rotate(-8deg); opacity:0; }
+  65%  { transform: scale(1.12) rotate(2deg); opacity:1; }
+  100% { transform: scale(1) rotate(0deg); opacity:1; }
+}
+@keyframes goalFadeOut {
+  0%   { opacity:1; }
+  100% { opacity:0; pointer-events:none; }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-10px) rotate(0deg);   opacity:1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
+}
+@keyframes goalRipple {
+  0%   { transform: scale(0); opacity:.6; }
+  100% { transform: scale(4); opacity:0; }
+}
+@keyframes goalSlideUp {
+  0%   { transform: translateY(30px); opacity:0; }
+  100% { transform: translateY(0);    opacity:1; }
+}
+`;
+
+const CONFETTI_COLORS = ["#ffd700","#c9a84c","#ffffff","#ff4444","#44aaff","#44ff88","#ff88ff"];
+
+function KofiButton() {
+  const [dismissed, setDismissed] = useState(false);
+  const [minimized, setMinimized] = useState(false);
+
+  if (dismissed) return null;
+
+  return (
+    <>
+      <style>{KOFI_CSS}</style>
+      <div style={{
+        position:"fixed",
+        bottom: minimized ? 30 : 16,
+        right:  minimized ? 74 : 16,
+        zIndex:999,
+        animation:"kofiSlideIn .55s cubic-bezier(.22,1,.36,1) both",
+        fontFamily:"'Segoe UI',Arial,sans-serif",
+        transition:"bottom .25s,right .25s",
+      }}>
+        {minimized ? (
+          /* Mini pill — se coloca a la izquierda del botón ↑ */
+          <button
+            onClick={()=>setMinimized(false)}
+            title="Apoya el app"
+            style={{
+              display:"flex",alignItems:"center",gap:6,
+              background:"linear-gradient(135deg,#0a1f40,#1a3a6b)",
+              border:"1.5px solid #c9a84c",borderRadius:50,
+              padding:"8px 14px",cursor:"pointer",color:"#ffd700",
+              fontSize:13,fontWeight:700,
+              animation:"kofiPulse 2.8s ease-in-out infinite",
+              boxShadow:"0 4px 20px rgba(201,168,76,.35)",
+            }}>
+            ☕ <span>Apoya</span>
+          </button>
+        ) : (
+          /* Full card */
+          <div style={{
+            background:"linear-gradient(145deg,#0a1f40 0%,#112244 100%)",
+            border:"1.5px solid #c9a84c",borderRadius:16,
+            padding:"14px 16px",width:220,
+            boxShadow:"0 8px 32px rgba(0,0,0,.55)",
+            animation:"kofiPulse 3s ease-in-out infinite",
+          }}>
+            {/* Header row */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{color:"#ffd700",fontWeight:800,fontSize:13,letterSpacing:".04em"}}>
+                ☕ Apoya el app
+              </span>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={()=>setMinimized(true)} title="Minimizar"
+                  style={{background:"none",border:"none",color:"#888",fontSize:14,cursor:"pointer",lineHeight:1,padding:"0 2px"}}>−</button>
+                <button onClick={()=>setDismissed(true)} title="Cerrar"
+                  style={{background:"none",border:"none",color:"#888",fontSize:14,cursor:"pointer",lineHeight:1,padding:"0 2px"}}>×</button>
+              </div>
+            </div>
+
+            <p style={{margin:"0 0 10px",fontSize:11.5,color:"#b0bcd4",lineHeight:1.45}}>
+              Esta app es gratuita y sin anuncios.<br/>
+              Tu apoyo la mantiene viva ⚽
+            </p>
+
+            {/* Amount chips */}
+            <div style={{display:"flex",gap:6,marginBottom:10}}>
+              {["$3","$5"].map(amt=>(
+                <a key={amt}
+                  href={`https://ko-fi.com/mundial2026`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{
+                    flex:1,textAlign:"center",padding:"5px 0",
+                    background:"rgba(201,168,76,.12)",
+                    border:"1px solid #c9a84c",borderRadius:8,
+                    color:"#ffd700",fontWeight:700,fontSize:13,
+                    textDecoration:"none",transition:"background .2s",
+                  }}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(201,168,76,.28)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(201,168,76,.12)"}
+                >
+                  {amt}
+                </a>
+              ))}
+            </div>
+
+            {/* Main CTA */}
+            <a
+              href="https://ko-fi.com/mundial2026"
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                display:"block",textAlign:"center",
+                background:"linear-gradient(135deg,#c9a84c,#ffd700)",
+                color:"#0a1f40",fontWeight:800,fontSize:13,
+                padding:"8px 0",borderRadius:10,
+                textDecoration:"none",letterSpacing:".04em",
+                transition:"filter .2s",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.filter="brightness(1.1)"}
+              onMouseLeave={e=>e.currentTarget.style.filter="brightness(1)"}
+            >
+              Apoyar en Ko-fi ☕
+            </a>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function GoalCelebration({ event, onDone }) {
+  const [phase, setPhase] = useState("in"); // in → stay → out
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("out"), 4200);
+    const t2 = setTimeout(() => onDone(), 5000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onDone]);
+
+  const pieces = useMemo(() => Array.from({length:38}, (_,i) => ({
+    id: i,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    left: `${Math.random()*100}%`,
+    delay: `${Math.random()*1.2}s`,
+    dur:   `${1.8 + Math.random()*1.6}s`,
+    size:  `${7 + Math.random()*10}px`,
+    shape: Math.random()>.5 ? "50%" : "2px",
+  })), []);
+
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:9999,
+      display:"flex", flexDirection:"column",
+      alignItems:"center", justifyContent:"center",
+      background:"rgba(0,0,0,.72)",
+      backdropFilter:"blur(4px)",
+      animation: phase==="out" ? "goalFadeOut .8s ease forwards" : "none",
+      pointerEvents: phase==="out" ? "none" : "auto",
+    }}>
+      {/* Confetti */}
+      {pieces.map(p=>(
+        <div key={p.id} style={{
+          position:"absolute", top:"-10px", left:p.left,
+          width:p.size, height:p.size,
+          background:p.color,
+          borderRadius:p.shape,
+          animation:`confettiFall ${p.dur} ${p.delay} ease-in forwards`,
+          pointerEvents:"none",
+        }}/>
+      ))}
+
+      {/* Ripple ring */}
+      <div style={{
+        position:"absolute", width:260, height:260,
+        borderRadius:"50%", border:"4px solid #ffd70066",
+        animation:"goalRipple 1s ease-out forwards",
+        pointerEvents:"none",
+      }}/>
+
+      {/* Card */}
+      <div style={{
+        background:"linear-gradient(145deg,#0a1f40,#162b4f)",
+        border:"2px solid #c9a84c",
+        borderRadius:24, padding:"28px 36px",
+        textAlign:"center", maxWidth:340, width:"90%",
+        boxShadow:"0 0 60px #c9a84c44, 0 20px 60px rgba(0,0,0,.8)",
+        animation:"goalTextPop .5s cubic-bezier(.34,1.56,.64,1) forwards",
+        position:"relative", overflow:"hidden",
+      }}>
+        {/* Glow top bar */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg,transparent,#c9a84c,#ffd700,#c9a84c,transparent)"}}/>
+
+        {/* Ball */}
+        <div style={{fontSize:56, animation:"goalBallDrop .7s cubic-bezier(.34,1.56,.64,1) forwards", display:"block", lineHeight:1, marginBottom:8}}>⚽</div>
+
+        {/* GOOOL text */}
+        <div style={{
+          fontSize:42, fontWeight:900, letterSpacing:".12em",
+          background:"linear-gradient(135deg,#ffd700,#c9a84c,#fff8dc)",
+          WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+          textShadow:"none", lineHeight:1, marginBottom:12,
+          animation:"goalTextPop .5s .15s cubic-bezier(.34,1.56,.64,1) both",
+        }}>¡GOOOL!</div>
+
+        {/* Match info */}
+        <div style={{animation:"goalSlideUp .4s .35s ease both"}}>
+          <div style={{fontSize:18, fontWeight:700, color:"#fff", marginBottom:6}}>
+            {event.home} <span style={{color:"#ffd700"}}>{event.homeScore}</span>
+            <span style={{color:"#556", margin:"0 8px"}}>–</span>
+            <span style={{color:"#ffd700"}}>{event.awayScore}</span> {event.away}
+          </div>
+          {event.scorer&&(
+            <div style={{fontSize:14, color:"#c9a84c", fontWeight:600}}>
+              ⚽ {event.scorer} {event.minute&&`${event.minute}'`}
+            </div>
+          )}
+          {event.team&&(
+            <div style={{fontSize:13, color:"#666", marginTop:4}}>
+              Gol de {event.team}
+            </div>
+          )}
+        </div>
+
+        {/* Tap to dismiss */}
+        <div style={{fontSize:11, color:"#333", marginTop:16, letterSpacing:".08em"}}>
+          TOCA PARA CERRAR
+        </div>
+        <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:"linear-gradient(90deg,transparent,#c9a84c,#ffd700,#c9a84c,transparent)"}}/>
+      </div>
+    </div>
+  );
+}
+
 
 // ── TEAM META & FLAGS ─────────────────────────────────────────────────────────
 const TEAM_META = {
@@ -67,13 +324,39 @@ const SVG_FLAGS = {
   pa:<svg viewBox="0 0 3 2"><rect width="1.5" height="1" fill="#fff"/><rect x="1.5" width="1.5" height="1" fill="#D21034"/><rect y="1" width="1.5" height="1" fill="#005293"/><rect x="1.5" y="1" width="1.5" height="1" fill="#fff"/></svg>,
 };
 
+// Banderas que usamos imagen del CDN (escudo complejo)
+const CDN_FLAGS = {
+  mx:"mx", ar:"ar", br:"br", ca:"ca", us:"us", de:"de",
+  es:"es", fr:"fr", pt:"pt", gb:"gb", it:"it",
+};
+
 const Flag = ({team, size=44}) => {
   const meta = TEAM_META[team];
-  const svg = meta ? SVG_FLAGS[meta.code] : null;
-  if (!svg) return <div style={{width:size,height:Math.round(size*0.67),background:"#1a2a3a",borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#555"}}>?</div>;
+  if (!meta) return <div style={{width:size,height:Math.round(size*0.67),background:"#1a2a3a",borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#555"}}>?</div>;
+
+  const h = Math.round(size*0.67);
+  const code = meta.code;
+
+  // México y otros con escudo complejo — imagen real desde flagcdn.com
+  if(code==="mx"){
+    return (
+      <div style={{width:size,height:h,borderRadius:3,overflow:"hidden",boxShadow:"0 2px 5px rgba(0,0,0,.5)",flexShrink:0}}>
+        <img
+          src={`https://flagcdn.com/w${Math.max(size*2,80)}/mx.png`}
+          alt="México"
+          width={size}
+          height={h}
+          style={{display:"block",width:size,height:h,objectFit:"cover"}}
+        />
+      </div>
+    );
+  }
+
+  const svg = SVG_FLAGS[code];
+  if (!svg) return <div style={{width:size,height:h,background:"#1a2a3a",borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#555"}}>?</div>;
   return (
-    <div style={{width:size,height:Math.round(size*0.67),borderRadius:3,overflow:"hidden",boxShadow:"0 2px 5px rgba(0,0,0,.5)",flexShrink:0}}>
-      {React.cloneElement(svg,{width:size,height:Math.round(size*0.67),style:{display:"block"}})}
+    <div style={{width:size,height:h,borderRadius:3,overflow:"hidden",boxShadow:"0 2px 5px rgba(0,0,0,.5)",flexShrink:0}}>
+      {React.cloneElement(svg,{width:size,height:h,style:{display:"block"}})}
     </div>
   );
 };
@@ -202,15 +485,19 @@ const INIT_STANDINGS = {
   L:[{t:"Inglaterra",code:"gb-eng"},{t:"Croacia",code:"hr"},{t:"Ghana",code:"gh"},{t:"Panamá",code:"pa"}],
 };
 
-const INIT_SCORERS = [
-  {name:"Kylian Mbappé",team:"Francia",goals:0,assists:0},
-  {name:"Lionel Messi",team:"Argentina",goals:0,assists:0},
-  {name:"Erling Haaland",team:"Noruega",goals:0,assists:0},
-  {name:"Vinicius Jr.",team:"Brasil",goals:0,assists:0},
-  {name:"Harry Kane",team:"Inglaterra",goals:0,assists:0},
-  {name:"Lamine Yamal",team:"España",goals:0,assists:0},
-  {name:"Bukayo Saka",team:"Inglaterra",goals:0,assists:0},
-  {name:"Rafael Leão",team:"Portugal",goals:0,assists:0},
+// Candidatos a la Bota de Oro — selección editorial, sin datos inventados.
+// Fuente: historial de clasificatorias y rendimiento 2024-25.
+const GOLDEN_BOOT_CANDIDATES = [
+  {name:"Kylian Mbappé",   team:"Francia",   pos:"Delantero",  club:"Real Madrid",    fact:"Máximo goleador del PSG en mundiales; campeón 2018, subcampeón 2022"},
+  {name:"Erling Haaland",  team:"Noruega",   pos:"Delantero",  club:"Man. City",      fact:"36 goles en Premier 22/23; Noruega clasificó por primera vez desde 2002 convirtiéndolo en líder histórico"},
+  {name:"Lionel Messi",    team:"Argentina", pos:"Mediocampista", club:"Inter Miami", fact:"Bota de Oro Mundial 2022 (7 goles); campeón vigente buscando su segunda estrella"},
+  {name:"Vinicius Jr.",    team:"Brasil",    pos:"Extremo",    club:"Real Madrid",    fact:"Balón de Oro 2024; motor ofensivo del pentacampeón"},
+  {name:"Harry Kane",      team:"Inglaterra",pos:"Delantero",  club:"Bayern Munich",  fact:"36 goles con Bayern en 23/24; máximo goleador histórico de Inglaterra"},
+  {name:"Lamine Yamal",    team:"España",    pos:"Extremo",    club:"FC Barcelona",   fact:"Mejor joven de la Eurocopa 2024 (17 años); España busca el bicampeonato"},
+  {name:"Victor Osimhen",  team:"Nigeria",   pos:"Delantero",  club:"Galatasaray",    fact:"Máximo goleador africano en Europa 2023; líder de las Súper Águilas"},
+  {name:"Richarlison",     team:"Brasil",    pos:"Delantero",  club:"Tottenham",      fact:"Hat-trick en clasificatorias 2026; vital para el ataque brasileño"},
+  {name:"Bukayo Saka",     team:"Inglaterra",pos:"Extremo",    club:"Arsenal",        fact:"12 goles y 13 asistencias en PL 23/24; mejor joven de Inglaterra"},
+  {name:"Antoine Griezmann",team:"Francia", pos:"Mediocampista",club:"Atlético Madrid",fact:"Bota de Oro del Mundial Rusia 2018; experiencia única en grandes torneos"},
 ];
 
 const VENUES = {
@@ -294,40 +581,32 @@ const QuinielaSystem = ({tz}) => {
   const publish = async(name,myC,grpC,p)=>{
     const pts=Object.values(p).reduce((a,q)=>a+(q.pts||0),0);
     const predicted=Object.values(p).filter(q=>q.pick).length;
-    const entry=JSON.stringify({name,myCode:myC,groupCode:grpC,pts,predicted,ts:Date.now()});
     try {
-      if(typeof window.storage !== "undefined") {
-        await window.storage.set(`global:${myC}`,entry,true);
-        if(grpC) await window.storage.set(`group:${grpC}:${myC}`,entry,true);
-      }
-    } catch(e){}
+      await fetch("/api/quiniela",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"save",data:{name,myCode:myC,groupCode:grpC,pts,predicted,picks:p}}),
+      });
+    } catch(e){ console.error("publish:",e); }
   };
 
   const loadGlobal = async()=>{
     setLoading(true);
     try {
-      if(typeof window.storage !== "undefined") {
-        const keys=await window.storage.list("global:",true);
-        const entries=await Promise.all((keys.keys||[]).slice(0,50).map(async k=>{
-          try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null;}catch(e){return null;}
-        }));
-        setGlobalBoard(entries.filter(Boolean).sort((a,b)=>b.pts-a.pts));
-      }
-    } catch(e){}
+      const res=await fetch("/api/quiniela?action=global");
+      const data=await res.json();
+      if(data.ok&&data.board) setGlobalBoard(data.board);
+    } catch(e){ console.error("loadGlobal:",e); }
     setLoading(false);
   };
 
   const loadGroup = async(code)=>{
     setLoading(true);
     try {
-      if(typeof window.storage !== "undefined") {
-        const keys=await window.storage.list(`group:${code}:`,true);
-        const entries=await Promise.all((keys.keys||[]).map(async k=>{
-          try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null;}catch(e){return null;}
-        }));
-        setGroupMembers(entries.filter(Boolean).sort((a,b)=>b.pts-a.pts));
-      }
-    } catch(e){}
+      const res=await fetch(`/api/quiniela?action=group&code=${encodeURIComponent(code)}`);
+      const data=await res.json();
+      if(data.ok&&data.members) setGroupMembers(data.members);
+    } catch(e){ console.error("loadGroup:",e); }
     setLoading(false);
   };
 
@@ -689,7 +968,21 @@ function useBreakpoint() {
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App() {
   const {isMobile,isTablet,isDesktop} = useBreakpoint();
+
+  // ── Goal celebration state ──
+  const [goalQueue, setGoalQueue] = useState([]); // queue of goal events
+  const prevScoresRef = useRef({});               // {matchId: {homeScore, awayScore}}
+
   const [view, setView]           = useState("schedule");
+  const [selectedVenue, setSelectedVenue] = useState(null);
+  const [premiumTier, setPremiumTier]     = useState(()=>checkPremium().tier);
+  const [showPricing, setShowPricing]     = useState(false);
+  const [pricingDefault, setPricingDefault] = useState("vip");
+
+  const openPricing = useCallback((tier="vip")=>{
+    setPricingDefault(tier);
+    setShowPricing(true);
+  },[]);
   const [month, setMonth]         = useState("2026-06");
   const [tz, setTz]               = useState("et");
   const [teamFilter, setTeamFilter] = useState("");
@@ -706,7 +999,7 @@ export default function App() {
     Object.entries(INIT_STANDINGS).forEach(([g,teams])=>{s[g]=teams.map(t=>({...t,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0}));});
     return s;
   });
-  const [scorers, setScorers]     = useState(INIT_SCORERS);
+  const [scorers, setScorers]     = useState([]);
   const [scorersFetched, setScorersFetched] = useState(false);
   const [shareMatch, setShareMatch] = useState(null);
   const [venueModal, setVenueModal] = useState(null);
@@ -763,15 +1056,79 @@ export default function App() {
     } catch(e){console.error("callAPI error",e);onError&&onError(e.message);}
   },[]);
 
-  const fetchLiveScores = useCallback(()=>{
+  const fetchLiveScores = useCallback(async ()=>{
     setFetchStatus("fetching");
-    callAPI(`Scores actuales del Mundial FIFA 2026. Hoy: ${new Date().toLocaleDateString("es-ES")}. Solo JSON array: [{home,away,homeScore,awayScore,status,minute}]. Sin markdown.`,(scores)=>{
+    try{
+      const res = await fetch("/api/live");
+      const data = await res.json();
+
+      if(data.status==="pre_tournament"||!data.matches?.length){
+        setFetchStatus("ok"); setLastUpdate(new Date()); return;
+      }
+
       const map={};
-      scores.forEach(s=>{const m=MATCHES.find(m=>(m.home===s.home||m.away===s.home)&&(m.home===s.away||m.away===s.away));if(m)map[m.id]={homeScore:s.homeScore,awayScore:s.awayScore,status:s.status,minute:s.minute};});
-      if(Object.keys(map).length>0) setLiveScores(map);
+      const newGoals=[];
+
+      data.matches.forEach(s=>{
+        // Intentar emparejar con MATCHES local por nombre de equipo (fuzzy)
+        const match=MATCHES.find(m=>{
+          const hHome=m.home.toLowerCase(), hAway=m.away.toLowerCase();
+          const sHome=(s.home||"").toLowerCase(), sAway=(s.away||"").toLowerCase();
+          return (hHome.includes(sHome.slice(0,5))||sHome.includes(hHome.slice(0,5)))&&
+                 (hAway.includes(sAway.slice(0,5))||sAway.includes(hAway.slice(0,5)));
+        });
+        const id = match?.id || `fd_${s.fdId}`;
+        const sc = {homeScore:s.homeScore??0, awayScore:s.awayScore??0, status:s.status, minute:s.minute, goals:s.goals||[]};
+        map[id] = sc;
+
+        // ── Detectar goles nuevos ──────────────────────────────
+        const prev = prevScoresRef.current[id];
+        if(!prev){ return; } // primer fetch, solo guardar baseline
+
+        const homeDiff = (sc.homeScore||0) - (prev.homeScore||0);
+        const awayDiff = (sc.awayScore||0) - (prev.awayScore||0);
+
+        if(homeDiff > 0 || awayDiff > 0){
+          // Buscar el/los goleador(es) nuevos comparando lista de goles
+          const prevGoalCount = (prev.goals||[]).length;
+          const newGoalEntries = (sc.goals||[]).slice(prevGoalCount); // los que no estaban antes
+
+          if(newGoalEntries.length > 0){
+            // Tenemos nombre del anotador
+            newGoalEntries.forEach(g=>{
+              newGoals.push({
+                home:      match?.home || s.home,
+                away:      match?.away || s.away,
+                homeScore: sc.homeScore,
+                awayScore: sc.awayScore,
+                team:      g.team,
+                scorer:    g.type==="OWN_GOAL" ? `${g.name} (A.P.)` : g.name,
+                minute:    g.minute,
+              });
+            });
+          } else {
+            // No tenemos goleador detallado, usamos equipo por diferencia de score
+            if(homeDiff > 0){
+              newGoals.push({home:match?.home||s.home, away:match?.away||s.away, homeScore:sc.homeScore, awayScore:sc.awayScore, team:match?.home||s.home, scorer:null, minute:sc.minute});
+            }
+            if(awayDiff > 0){
+              newGoals.push({home:match?.home||s.home, away:match?.away||s.away, homeScore:sc.homeScore, awayScore:sc.awayScore, team:match?.away||s.away, scorer:null, minute:sc.minute});
+            }
+          }
+        }
+      });
+
+      // Guardar baseline para próxima comparación
+      prevScoresRef.current = map;
+      if(newGoals.length > 0) setGoalQueue(q=>[...q, ...newGoals]);
+      if(Object.keys(map).length > 0) setLiveScores(map);
       setFetchStatus("ok"); setLastUpdate(new Date());
-    });
-  },[callAPI]);
+
+    } catch(e){
+      console.error("fetchLiveScores:", e);
+      setFetchStatus("error");
+    }
+  },[]);
 
   const fetchStandings = useCallback(()=>{
     callAPI(`Tabla de posiciones Mundial FIFA 2026, grupos A-L. Hoy: ${new Date().toLocaleDateString("es-ES")}. Solo JSON: {"A":[{t,pj,pg,pe,pp,gf,gc,pts}],...}. Sin markdown.`,(parsed)=>{
@@ -784,13 +1141,80 @@ export default function App() {
     });
   },[callAPI]);
 
-  const fetchScorers = useCallback(()=>{
-    callAPI(
-      `Top goleadores del Mundial FIFA 2026. Hoy: ${new Date().toLocaleDateString("es-ES")}. Responde SOLO con JSON válido sin markdown, máximo 10 jugadores: [{"name":"Nombre Apellido","team":"País","goals":0,"assists":0}]`,
-      (list)=>{if(Array.isArray(list)&&list.length>0){setScorers(list);setScorersFetched(true);}},
-      ()=>{}
-    );
-  },[callAPI]);
+  const [scorersSource, setScorersSource] = useState(null);
+  const [scorersCrossChecked, setScorersCrossChecked] = useState(false);
+  const [scorersUpdatedAt, setScorersUpdatedAt] = useState(null);
+  const [scorersLoading, setScorersLoading] = useState(false);
+
+  // ── Reporte de fallas ──
+  const [reportTypes, setReportTypes]   = useState([]);
+  const [reportComment, setReportComment] = useState("");
+  const [reportStatus, setReportStatus] = useState("idle"); // idle|sending|ok|error
+  const REPORT_OPTIONS = [
+    "Los scores en vivo no actualizan",
+    "La predicción IA no responde",
+    "La animación de gol no aparece",
+    "Una bandera se ve incorrecta",
+    "El calendario muestra info incorrecta",
+    "Las noticias no cargan",
+    "La quiniela tiene un error",
+    "Problema con las sedes / fotos",
+    "La app va lenta o se congela",
+    "Otro problema",
+  ];
+  const toggleReportType = (opt) => setReportTypes(prev =>
+    prev.includes(opt) ? prev.filter(t=>t!==opt) : [...prev, opt]
+  );
+  const submitReport = async () => {
+    if(reportTypes.length===0 && !reportComment.trim()) return;
+    setReportStatus("sending");
+    try{
+      const res = await fetch("/api/report",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          types:   reportTypes,
+          comment: reportComment.trim(),
+          page:    view,
+          ua:      navigator.userAgent,
+          ts:      new Date().toISOString(),
+        }),
+      });
+      const data = await res.json();
+      setReportStatus(data.ok ? "ok" : "error");
+      if(data.ok){ setReportTypes([]); setReportComment(""); }
+    }catch(e){
+      setReportStatus("error");
+    }
+  };
+
+  const fetchScorers = useCallback(async ()=>{
+    const hoy=new Date().toISOString().split("T")[0];
+    if(hoy<"2026-06-11"){setScorersFetched(true);return;}
+    setScorersLoading(true);
+    try{
+      const res=await fetch("/api/scorers");
+      const data=await res.json();
+      if(data.status==="live"&&Array.isArray(data.scorers)&&data.scorers.length>0){
+        setScorers(data.scorers);
+        setScorersSource(data.source||null);
+        setScorersCrossChecked(!!data.crossChecked);
+        setScorersUpdatedAt(data.updatedAt||null);
+      } else if(data.status==="pre_tournament"){
+        // no hacer nada, la UI ya maneja este estado
+      } else {
+        setScorers([]);
+        setScorersSource(data.errors?.join(" · ")||"Sin datos");
+      }
+      setScorersFetched(true);
+    }catch(e){
+      console.error("fetchScorers:",e);
+      setScorersSource("Error de red");
+      setScorersFetched(true);
+    }finally{
+      setScorersLoading(false);
+    }
+  },[]);
 
   const fetchNews = useCallback(()=>{
     setNewsLoading(true);
@@ -802,14 +1226,24 @@ export default function App() {
   },[callAPI]);
 
   const runPredictor = useCallback((match,pick)=>{
+    // Gate on tier limits before calling API
+    if (!canUseIa(premiumTier)) {
+      const usage = getIaUsage(premiumTier);
+      if (usage.mode === "daily") {
+        openPricing("pro");
+      } else {
+        openPricing("vip");
+      }
+      return;
+    }
     setPredictView("loading");
     const pickLabel=pick==="home"?match.home:pick==="away"?match.away:"Empate";
     callAPI(
       `Eres analista experto del Mundial FIFA 2026. Analiza: ${match.home} vs ${match.away} (Grupo ${match.group||match.phase}, ${match.date}, ${match.venue}). El usuario predice: ${pickLabel}. Responde SOLO con JSON válido sin markdown: {"homeProb":50,"drawProb":25,"awayProb":25,"factors":["factor1","factor2","factor3"],"homePlayer":"Nombre","awayPlayer":"Nombre","prediction":"Local gana","score":"2-1","userCorrect":true,"summary":"Análisis breve"}`,
-      (data)=>{setPredictResult(data);setPredictView("result");},
+      (data)=>{recordIaUse(premiumTier);setPredictResult(data);setPredictView("result");},
       (err)=>{console.error("Predictor error:",err);setPredictView("error");}
     );
-  },[callAPI]);
+  },[callAPI, premiumTier, openPricing]);
 
   // Auto-refresh (after fetch fns are defined)
   useEffect(()=>{
@@ -842,43 +1276,108 @@ export default function App() {
 
   const pill=(active,color="#c9a84c")=>({padding:"5px 10px",borderRadius:6,border:"1px solid",borderColor:active?color:"rgba(255,255,255,.15)",background:active?`${color}33`:"rgba(255,255,255,.07)",color:active?"#fff":"#aaa",fontFamily:"inherit",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s"});
   const navBtn=(txt,icon,active,onClick)=>(
-    <button onClick={onClick} style={{padding:"10px 11px",border:"none",background:active?"rgba(201,168,76,.15)":"none",borderBottom:active?"3px solid #c9a84c":"3px solid transparent",color:active?"#ffd700":"#666",fontFamily:"inherit",fontWeight:700,fontSize:13,letterSpacing:".06em",cursor:"pointer",transition:"all .2s",textTransform:"uppercase",display:"flex",alignItems:"center",gap:4,whiteSpace:"nowrap"}}>
-      <span style={{fontSize:13}}>{icon}</span>{txt}
+    <button onClick={onClick} style={{flex:"1 1 auto",padding:isMobile?"8px 4px":"10px 11px",border:"none",background:active?"rgba(201,168,76,.15)":"none",borderBottom:active?"3px solid #c9a84c":"3px solid transparent",color:active?"#ffd700":"#666",fontFamily:"inherit",fontWeight:700,fontSize:isMobile?10:13,letterSpacing:isMobile?".02em":".06em",cursor:"pointer",transition:"all .2s",textTransform:"uppercase",display:"flex",flexDirection:isMobile?"column":"row",alignItems:"center",justifyContent:"center",gap:isMobile?2:4,whiteSpace:"nowrap",minWidth:0}}>
+      <span style={{fontSize:isMobile?16:13}}>{icon}</span>
+      {!isMobile&&txt}
+      {isMobile&&<span style={{fontSize:9,lineHeight:1.1,textAlign:"center"}}>{txt}</span>}
     </button>
   );
 
+  // Dismiss top goal from queue
+  const dismissGoal = useCallback(()=>{
+    setGoalQueue(q=>q.slice(1));
+  },[]);
+
   return (
     <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#0f1f3d,#162b4f 45%,#0c1f14)",fontFamily:"'Oswald','Impact',sans-serif",color:"#fff"}}>
+
+      {/* ── CSS animations (injected once) ── */}
+      <style>{GOAL_CSS}</style>
+
+      {/* ── Goal celebration overlay ── */}
+      {goalQueue.length>0&&(
+        <div onClick={dismissGoal} style={{cursor:"pointer"}}>
+          <GoalCelebration event={goalQueue[0]} onDone={dismissGoal}/>
+        </div>
+      )}
+
+      {/* ── Pricing modal global ── */}
+      {showPricing&&(
+        <PricingModal
+          defaultTier={pricingDefault}
+          onClose={()=>setShowPricing(false)}
+          onActivate={(tier)=>{ setPremiumTier(tier); setShowPricing(false); }}
+        />
+      )}
+
+      {/* ── Ko-fi support button ── */}
+      <KofiButton />
 
       {shareMatch&&<ShareCard match={shareMatch} tz={tz} lang={lang} onClose={()=>setShareMatch(null)}/>}
       {venueModal&&<VenueModal venueName={venueModal} onClose={()=>setVenueModal(null)}/>}
 
       {/* HEADER */}
       <div style={{position:"sticky",top:0,zIndex:30,background:"rgba(12,24,52,.98)",backdropFilter:"blur(20px)",borderBottom:"2px solid #c9a84c"}}>
-        <div style={{maxWidth:"100%",margin:"0 auto",padding:isMobile?"8px 10px 0":"10px 16px 0"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8}}>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <span style={{fontSize:isMobile?24:32,lineHeight:1}}>⚽</span>
-              <div>
-                <div style={{fontSize:isMobile?"clamp(14px,4vw,20px)":"clamp(16px,3.2vw,26px)",fontWeight:900,letterSpacing:".12em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
-                <div style={{fontSize:isMobile?10:12,color:"#c9a84c",letterSpacing:isMobile?".05em":".15em"}}>{isMobile?"🇺🇸🇲🇽🇨🇦 11 Jun – 19 Jul":"GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá · 11 Jun – 19 Jul"}</div>
+        <div style={{maxWidth:"100%",margin:"0 auto",padding:isMobile?"6px 10px 0":"10px 16px 0"}}>
+
+          {/* ── Mobile layout: título arriba, controles abajo ── */}
+          {isMobile?(
+            <>
+              {/* Fila 1: logo + título + badge */}
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                <span style={{fontSize:22,lineHeight:1,flexShrink:0}}>⚽</span>
+                <div style={{minWidth:0,flex:1}}>
+                  <div style={{fontSize:"clamp(17px,5.5vw,22px)",fontWeight:900,letterSpacing:".1em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
+                  {/* Subtítulo en 2 líneas si no cabe — sin cortar */}
+                  <div style={{fontSize:"clamp(9px,2.5vw,11px)",color:"#c9a84c",letterSpacing:".04em",marginTop:3,lineHeight:1.4}}>
+                    <span>GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá</span>
+                    <span style={{display:"block"}}>11 Jun – 19 Jul 2026</span>
+                  </div>
+                </div>
+                <PremiumBadge tier={premiumTier} onClick={()=>openPricing(premiumTier==="free"?"vip":premiumTier)} />
               </div>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                {!isMobile&&<span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>🕐 ZONA HORARIA</span>}
-                <div style={{display:"flex",gap:2}}>{TIMEZONES.map(t=><button key={t.key} onClick={()=>setTz(t.key)} style={{...pill(tz===t.key),fontSize:isMobile?11:13,padding:"4px 8px"}} title={t.full}>{t.label}</button>)}</div>
+              {/* Fila 2: ZONA HORARIA */}
+              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
+                <span style={{fontSize:11,color:"#888",letterSpacing:".06em",flexShrink:0}}>🕐 HORA</span>
+                <div style={{display:"flex",gap:2}}>{TIMEZONES.map(t=><button key={t.key} onClick={()=>setTz(t.key)} style={{...pill(tz===t.key),fontSize:11,padding:"3px 8px"}} title={t.full}>{t.label}</button>)}</div>
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                {!isMobile&&<span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>📺 VER EN</span>}
+              {/* Fila 3: VER EN */}
+              <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
+                <span style={{fontSize:11,color:"#888",letterSpacing:".06em",flexShrink:0}}>📺 VER EN</span>
                 <div style={{display:"flex",gap:2}}>
-                  <button onClick={()=>setLang("es")} style={{...pill(lang==="es","#d4001a"),fontSize:isMobile?11:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇪🇸</span><span>Español</span></button>
-                  <button onClick={()=>setLang("en")} style={{...pill(lang==="en","#003da5"),fontSize:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇺🇸</span><span>English</span></button>
+                  <button onClick={()=>setLang("es")} style={{...pill(lang==="es","#d4001a"),fontSize:11,padding:"3px 9px",display:"flex",alignItems:"center",gap:3}}><span>🇪🇸</span><span>Español</span></button>
+                  <button onClick={()=>setLang("en")} style={{...pill(lang==="en","#003da5"),fontSize:11,padding:"3px 9px",display:"flex",alignItems:"center",gap:3}}><span>🇺🇸</span><span>English</span></button>
+                </div>
+              </div>
+            </>
+          ):(
+            /* ── Desktop/Tablet layout: todo en una fila ── */
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8,marginBottom:8}}>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <span style={{fontSize:32,lineHeight:1}}>⚽</span>
+                <div>
+                  <div style={{fontSize:"clamp(16px,3.2vw,26px)",fontWeight:900,letterSpacing:".12em",background:"linear-gradient(90deg,#ffd700,#c9a84c,#fff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1}}>MUNDIAL 2026</div>
+                  <div style={{fontSize:12,color:"#c9a84c",letterSpacing:".15em"}}>GUÍA DEL FAN LATINO · 🇺🇸 EE.UU. · 🇲🇽 México · 🇨🇦 Canadá · 11 Jun – 19 Jul</div>
+                </div>
+                <PremiumBadge tier={premiumTier} onClick={()=>openPricing(premiumTier==="free"?"vip":premiumTier)} />
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>🕐 ZONA HORARIA</span>
+                  <div style={{display:"flex",gap:2}}>{TIMEZONES.map(t=><button key={t.key} onClick={()=>setTz(t.key)} style={{...pill(tz===t.key),fontSize:13,padding:"4px 8px"}} title={t.full}>{t.label}</button>)}</div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:12,color:"#555",letterSpacing:".1em"}}>📺 VER EN</span>
+                  <div style={{display:"flex",gap:2}}>
+                    <button onClick={()=>setLang("es")} style={{...pill(lang==="es","#d4001a"),fontSize:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇪🇸</span><span>Español</span></button>
+                    <button onClick={()=>setLang("en")} style={{...pill(lang==="en","#003da5"),fontSize:13,padding:"4px 9px",display:"flex",alignItems:"center",gap:4}}><span>🇺🇸</span><span>English</span></button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div style={{display:"flex",gap:0,borderTop:"1px solid rgba(255,255,255,.07)",overflowX:"auto"}}>
+          )}
+          <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:0,borderTop:"1px solid rgba(255,255,255,.07)"}}>
+
             {navBtn("Calendario","📅",view==="schedule",()=>setView("schedule"))}
             {navBtn("En Vivo","🔴",view==="live",()=>setView("live"))}
             {navBtn("Posiciones","📊",view==="standings",()=>{setView("standings");fetchStandings();})}
@@ -887,8 +1386,10 @@ export default function App() {
             {navBtn("Quiniela","🎯",view==="quiniela",()=>setView("quiniela"))}
             {navBtn("Noticias","📰",view==="news",()=>{setView("news");if(!newsFetched)fetchNews();})}
             {navBtn("Sedes","🏟️",view==="venues",()=>setView("venues"))}
+            {navBtn("Turista","🗺️",view==="tourist",()=>setView("tourist"))}
             {navBtn("Bracket","🏆",view==="bracket",()=>setView("bracket"))}
             {navBtn("Favoritos","⭐",view==="compact",()=>setView("compact"))}
+            {navBtn("Ayuda","❓",view==="help",()=>setView("help"))}
           </div>
         </div>
       </div>
@@ -955,35 +1456,131 @@ export default function App() {
       )}
 
       {/* ── SCORERS ── */}
-      {view==="scorers"&&(
+      {view==="scorers"&&(()=>{
+        const hoy=new Date().toISOString().split("T")[0];
+        const torneoIniciado=hoy>="2026-06-11";
+        return(
         <div style={{maxWidth:700,margin:"20px auto",padding:"0 16px 60px"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
-            <div><div style={{fontSize:18,fontWeight:800,color:"#fff"}}>⚽ TOP GOLEADORES</div><div style={{fontSize:14,color:"#555",marginTop:2}}>Máximos anotadores del torneo</div></div>
-            <button onClick={fetchScorers} style={{...pill(false),padding:"8px 14px",borderColor:"#c9a84c",color:"#ffd700"}}>🔄 Actualizar</button>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {scorers.map((sc,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:"rgba(8,40,80,.8)",border:"1px solid #1a6eb533",borderRadius:12,padding:"12px 14px"}}>
-                <div style={{width:30,height:30,borderRadius:7,background:i===0?"#c9a84c":i===1?"#888":i===2?"#7a4a00":"rgba(255,255,255,.05)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:16,color:i<3?"#fff":"#555",flexShrink:0}}>{i+1}</div>
-                <Flag team={sc.team} size={28}/>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:700,color:"#fff"}}>{sc.name}</div>
-                  <div style={{fontSize:13,color:"#555"}}>{sc.team}</div>
-                </div>
-                <div style={{textAlign:"center",minWidth:44}}>
-                  <div style={{fontSize:22,fontWeight:900,color:"#ffd700",lineHeight:1}}>{sc.goals}</div>
-                  <div style={{fontSize:11,color:"#555",letterSpacing:".1em"}}>GOLES</div>
-                </div>
-                {sc.assists!=null&&<div style={{textAlign:"center",minWidth:36}}>
-                  <div style={{fontSize:16,fontWeight:700,color:"#888",lineHeight:1}}>{sc.assists}</div>
-                  <div style={{fontSize:11,color:"#444",letterSpacing:".1em"}}>ASIST.</div>
-                </div>}
+          {/* Cabecera */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4,flexWrap:"wrap",gap:10}}>
+            <div>
+              <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>
+                ⚽ {torneoIniciado?"TOP GOLEADORES":"CANDIDATOS · BOTA DE ORO"}
               </div>
-            ))}
+              <div style={{fontSize:13,color:"#556",marginTop:2}}>
+                {torneoIniciado
+                  ? "Máximos anotadores del torneo · Datos en vivo"
+                  : "Favoritos editoriales antes del inicio del torneo"}
+              </div>
+            </div>
+            {torneoIniciado&&(
+              <button onClick={fetchScorers} style={{...pill(false),padding:"8px 14px",borderColor:"#c9a84c",color:"#ffd700"}}>🔄 Actualizar</button>
+            )}
           </div>
-          {!scorersFetched&&<div style={{marginTop:12,fontSize:14,color:"#444"}}>⚠️ El torneo comienza el 11 de junio. Pulsa "Actualizar" para datos reales.</div>}
+
+          {/* Banner pre-torneo */}
+          {!torneoIniciado&&(
+            <div style={{background:"rgba(201,168,76,.1)",border:"1px solid #c9a84c55",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",alignItems:"flex-start",gap:10}}>
+              <span style={{fontSize:20,flexShrink:0}}>📅</span>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:"#ffd700"}}>El torneo comienza el 11 de junio de 2026</div>
+                <div style={{fontSize:12,color:"#999",marginTop:3}}>
+                  Los goleadores reales se mostrarán cuando arranque el Mundial. Lo que ves abajo es una selección editorial — no son estadísticas del torneo.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Barra de fuente + validación cruzada (post-inicio) */}
+          {torneoIniciado&&scorersFetched&&scorersSource&&(
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:10,marginTop:8}}>
+              <span style={{fontSize:11,color:"#999",letterSpacing:".05em"}}>FUENTE:</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#6aadff",background:"rgba(106,173,255,.1)",borderRadius:4,padding:"2px 7px"}}>{scorersSource}</span>
+              {scorersCrossChecked&&(
+                <span style={{fontSize:11,fontWeight:700,color:"#4a7",background:"rgba(68,170,100,.1)",borderRadius:4,padding:"2px 7px"}}>✓ Cruzado con ESPN</span>
+              )}
+              {scorersUpdatedAt&&(
+                <span style={{fontSize:11,color:"#444",marginLeft:"auto"}}>
+                  Actualizado {new Date(scorersUpdatedAt).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Lista: datos reales (post-inicio) */}
+          {torneoIniciado&&(
+            <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:4}}>
+              {scorersLoading&&(
+                <div style={{textAlign:"center",padding:"30px 0",color:"#c9a84c",fontSize:15}}>
+                  ⏳ Consultando fuentes oficiales…
+                </div>
+              )}
+              {!scorersLoading&&scorers.length===0&&scorersFetched&&(
+                <div style={{color:"#555",fontSize:14,textAlign:"center",padding:"30px 0"}}>
+                  Sin datos disponibles. Pulsa 🔄 Actualizar.
+                </div>
+              )}
+              {scorers.map((sc,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:"rgba(8,40,80,.8)",border:`1px solid ${sc.verified?"#4a733355":"#1a6eb533"}`,borderRadius:12,padding:"12px 14px",position:"relative"}}>
+                  {sc.verified&&(
+                    <span title="Dato confirmado en ESPN" style={{position:"absolute",top:7,right:9,fontSize:10,color:"#4a7",letterSpacing:".05em"}}>✓ ESPN</span>
+                  )}
+                  <div style={{width:30,height:30,borderRadius:7,background:i===0?"#c9a84c":i===1?"#888":i===2?"#7a4a00":"rgba(255,255,255,.05)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:16,color:i<3?"#fff":"#555",flexShrink:0}}>{i+1}</div>
+                  <Flag team={sc.team} size={28}/>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:16,fontWeight:700,color:"#fff"}}>{sc.name}</div>
+                    <div style={{fontSize:13,color:"#555"}}>{sc.team}</div>
+                  </div>
+                  <div style={{textAlign:"center",minWidth:44}}>
+                    <div style={{fontSize:22,fontWeight:900,color:"#ffd700",lineHeight:1}}>{sc.goals}</div>
+                    <div style={{fontSize:11,color:"#555",letterSpacing:".1em"}}>GOLES</div>
+                  </div>
+                  {sc.assists!=null&&<div style={{textAlign:"center",minWidth:36}}>
+                    <div style={{fontSize:16,fontWeight:700,color:"#888",lineHeight:1}}>{sc.assists}</div>
+                    <div style={{fontSize:11,color:"#444",letterSpacing:".1em"}}>ASIST.</div>
+                  </div>}
+                  {sc.penalties!=null&&sc.penalties>0&&<div style={{textAlign:"center",minWidth:30}}>
+                    <div style={{fontSize:14,fontWeight:700,color:"#a55",lineHeight:1}}>{sc.penalties}</div>
+                    <div style={{fontSize:10,color:"#444",letterSpacing:".05em"}}>PEN.</div>
+                  </div>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Lista editorial (pre-inicio) */}
+          {!torneoIniciado&&(
+            <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:4}}>
+              {GOLDEN_BOOT_CANDIDATES.map((c,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:12,background:"rgba(8,40,80,.8)",border:"1px solid #1a6eb533",borderRadius:12,padding:"12px 14px"}}>
+                  <div style={{width:28,height:28,borderRadius:6,background:"rgba(255,255,255,.05)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:14,color:"#556",flexShrink:0}}>{i+1}</div>
+                  <Flag team={c.team} size={28}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                      <span style={{fontSize:16,fontWeight:700,color:"#fff"}}>{c.name}</span>
+                      <span style={{fontSize:11,color:"#888",background:"rgba(255,255,255,.06)",borderRadius:4,padding:"2px 6px",letterSpacing:".05em"}}>{c.pos}</span>
+                    </div>
+                    <div style={{fontSize:12,color:"#4a7",marginTop:2}}>{c.club} · {c.team}</div>
+                    <div style={{fontSize:12,color:"#556",marginTop:4,lineHeight:1.4}}>{c.fact}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Disclaimer */}
+          <div style={{marginTop:16,padding:"10px 14px",background:"rgba(255,255,255,.03)",borderRadius:8,borderLeft:"3px solid #333"}}>
+            <div style={{fontSize:12,color:"#556",lineHeight:1.5}}>
+              {torneoIniciado
+                ? "📡 Datos obtenidos de football-data.org (fuente oficial FIFA) y validados contra ESPN. Los penaltis se contabilizan dentro de los goles totales. Para cifras oficiales: "
+                : "ℹ️ Esta selección es editorial y no representa estadísticas del torneo. Los goleadores reales aparecerán al inicio del torneo (11 jun). Para información oficial: "}
+              <a href="https://www.fifa.com/fifaplus/es/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noopener noreferrer" style={{color:"#6aadff",textDecoration:"underline"}}>FIFA.com</a>
+              {torneoIniciado&&<>{" · "}<a href="https://www.espn.com/soccer/competition/_/id/FIFA.WORLD_Q.UEFA" target="_blank" rel="noopener noreferrer" style={{color:"#6aadff",textDecoration:"underline"}}>ESPN</a></>}.
+            </div>
+          </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ── PREDICCIÓN IA ── */}
       {view==="predictor"&&(
@@ -1262,6 +1859,165 @@ export default function App() {
           )}
         </div>
       )}
+
+      {/* ── GUÍA TURISTA ── */}
+      {view==="tourist"&&(
+        <TouristGuide
+          initialVenue={selectedVenue}
+          isMobile={isMobile}
+          onShowPricing={openPricing}
+          premiumTier={premiumTier}
+          onTierChange={setPremiumTier}
+        />
+      )}
+
+      {/* ── AYUDA & REPORTE ── */}
+      {view==="help"&&(()=>{
+        const sec=(icon,title,desc)=>(
+          <div style={{background:"rgba(8,40,80,.7)",border:"1px solid #1a6eb533",borderRadius:12,padding:"14px 16px",marginBottom:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+              <span style={{fontSize:22}}>{icon}</span>
+              <span style={{fontSize:15,fontWeight:800,color:"#ffd700",letterSpacing:".06em"}}>{title}</span>
+            </div>
+            <div style={{fontSize:13,color:"#aaa",lineHeight:1.7}}>{desc}</div>
+          </div>
+        );
+        return(
+        <div style={{maxWidth:700,margin:"20px auto",padding:"0 16px 80px"}}>
+          <div style={{fontSize:20,fontWeight:900,color:"#fff",marginBottom:4}}>❓ GUÍA DE LA APP</div>
+          <div style={{fontSize:13,color:"#556",marginBottom:20}}>Todo lo que necesitas saber para sacarle el máximo provecho</div>
+
+          {sec("📅","CALENDARIO","Muestra los 72 partidos del Mundial ordenados por fecha. Filtra por equipo, fase (Grupos / Ronda de 32 / Cuartos / Semis / Final) o sede. Cambia entre Junio y Julio con las pestañas superiores. Selecciona tu zona horaria (ET · CT · MT · PT) en el encabezado para ver los horarios ajustados. Toca cualquier partido para ver más detalles y compartirlo.")}
+          {sec("🔴","EN VIVO","Muestra los partidos del día con los marcadores en tiempo real. Los scores se actualizan automáticamente cada 2 minutos desde fuentes oficiales. Cuando se marca un gol, aparece una animación de celebración en toda la pantalla sin importar en qué sección estés.")}
+          {sec("🎉","ANIMACIÓN DE GOL","Cada vez que se detecta un gol en un partido en vivo, aparece automáticamente una celebración con confetti, el marcador actualizado y el nombre del equipo que anotó. Toca la pantalla o espera 5 segundos para cerrarla.")}
+          {sec("📊","POSICIONES","Tabla de posiciones de los 12 grupos (A–L) con puntos, partidos jugados, goles a favor, goles en contra y diferencia de goles. Se actualiza durante el torneo.")}
+          {sec("⚽","GOLEADORES","Antes del inicio del torneo (11 jun) muestra los 10 candidatos favoritos a la Bota de Oro con datos verificados. Durante el torneo muestra los goleadores reales obtenidos de football-data.org (fuente oficial FIFA), validados contra ESPN.")}
+          {sec("🔮","PREDICCIÓN IA","Elige un partido del calendario, selecciona quién crees que gana (local, visitante o empate) y la IA analiza el partido considerando historial, forma reciente, fase del torneo y sede. Recibirás probabilidades, jugadores clave y un análisis detallado en segundos.")}
+          {sec("🎯","QUINIELA","Crea tu quiniela personal prediciendo los 24 partidos de la fase de grupos. Comparte tu código único (MUN26-XXXXX) con amigos para comparar predicciones. Tus respuestas se guardan automáticamente en el dispositivo.")}
+          {sec("📰","NOTICIAS","Genera titulares y resúmenes de las noticias más relevantes del Mundial en español usando IA. Toca 'Actualizar' para obtener las últimas noticias. El ícono de YouTube te lleva a búsquedas del tema en video.")}
+          {sec("🏟️","SEDES","Galería de los 16 estadios sede del Mundial 2026 en EE.UU., México y Canadá. Toca cada estadio para ver capacidad, superficie, curiosidades, partidos que albergará y su ubicación. Las fotos son imágenes reales con licencia libre (Wikimedia Commons).")}
+          {sec("🏆","BRACKET","Vista del cuadro eliminatorio completo desde Cuartos de Final hasta la Gran Final (19 jul, MetLife Stadium). Incluye las semifinales, el partido por el tercer lugar y la final.")}
+          {sec("⭐","FAVORITOS","Selecciona tu selección favorita para ver solo sus partidos de forma rápida, con el marcador en vivo y una cuenta regresiva al próximo partido.")}
+          {sec("🕐","ZONA HORARIA","Cambia entre ET (Este), CT (Centro), MT (Montaña) y PT (Pacífico) en el encabezado para ver todos los horarios ajustados a tu ubicación.")}
+          {sec("📺","IDIOMA","Alterna entre Español e English para cambiar el canal de TV recomendado para cada partido (Telemundo/Univision en español, Fox Sports/NBC en inglés).")}
+
+          {/* ── APOYA EL PROYECTO ── */}
+          <div style={{borderTop:"2px solid #c9a84c44",paddingTop:20,marginTop:10,marginBottom:10}}>
+            <div style={{fontSize:17,fontWeight:800,color:"#ffd700",marginBottom:4}}>☕ APOYA ESTE PROYECTO</div>
+            <div style={{fontSize:13,color:"#889",marginBottom:16,lineHeight:1.6}}>
+              Esta app es gratuita, sin anuncios y está hecha con mucho amor por el fútbol. Si te ha sido útil y quieres ayudar a mantenerla activa durante el Mundial, considera invitarme un café ☕
+            </div>
+
+            <div style={{background:"linear-gradient(145deg,rgba(201,168,76,.08),rgba(201,168,76,.18))",border:"1.5px solid #c9a84c",borderRadius:16,padding:"18px 16px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                <span style={{fontSize:28}}>⚽</span>
+                <div>
+                  <div style={{fontSize:14,fontWeight:800,color:"#ffd700",letterSpacing:".04em"}}>Mundial 2026 · Guía del Fan Latino</div>
+                  <div style={{fontSize:12,color:"#aaa"}}>ko-fi.com/mundial2026</div>
+                </div>
+              </div>
+
+              <p style={{fontSize:13,color:"#c0cde0",lineHeight:1.65,margin:"0 0 14px"}}>
+                Con tu apoyo podemos seguir mejorando la app: más estadísticas, notificaciones de goles, predicciones en tiempo real y mucho más durante todo el torneo.
+              </p>
+
+              {/* Montos sugeridos */}
+              <div style={{display:"flex",gap:8,marginBottom:12}}>
+                {[
+                  {amt:"$3",label:"☕ Un café"},
+                  {amt:"$5",label:"⚽ Un gol"},
+                ].map(({amt,label})=>(
+                  <a key={amt}
+                    href="https://ko-fi.com/mundial2026"
+                    target="_blank" rel="noopener noreferrer"
+                    style={{
+                      flex:1,textAlign:"center",padding:"10px 6px",
+                      background:"rgba(201,168,76,.12)",
+                      border:"1.5px solid #c9a84c",borderRadius:10,
+                      color:"#ffd700",fontWeight:800,fontSize:14,
+                      textDecoration:"none",lineHeight:1.3,
+                      display:"block",
+                    }}>
+                    <div>{amt}</div>
+                    <div style={{fontSize:11,fontWeight:400,color:"#aaa",marginTop:2}}>{label}</div>
+                  </a>
+                ))}
+              </div>
+
+              {/* CTA principal */}
+              <a
+                href="https://ko-fi.com/mundial2026"
+                target="_blank" rel="noopener noreferrer"
+                style={{
+                  display:"block",textAlign:"center",
+                  background:"linear-gradient(135deg,#c9a84c,#ffd700)",
+                  color:"#0a1f40",fontWeight:900,fontSize:15,
+                  padding:"12px 0",borderRadius:12,
+                  textDecoration:"none",letterSpacing:".06em",
+                }}>
+                ☕ Apoyar en Ko-fi
+              </a>
+
+              <div style={{marginTop:10,fontSize:11,color:"#556",textAlign:"center"}}>
+                Pago seguro · Sin suscripción · Monto libre · 100% va al desarrollador
+              </div>
+            </div>
+          </div>
+
+          {/* ── FORMULARIO DE REPORTE ── */}
+          <div style={{borderTop:"2px solid #c9a84c44",paddingTop:20,marginTop:10}}>
+            <div style={{fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>🚨 REPORTAR UNA FALLA</div>
+            <div style={{fontSize:13,color:"#556",marginBottom:14}}>¿Algo no funciona? Cuéntanos para mejorarlo.</div>
+
+            {/* Opciones predefinidas */}
+            <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:14}}>
+              {REPORT_OPTIONS.map(opt=>{
+                const sel=reportTypes.includes(opt);
+                return(
+                  <button key={opt} onClick={()=>toggleReportType(opt)} style={{padding:"6px 12px",borderRadius:20,border:`1px solid ${sel?"#c9a84c":"#2a3a5a"}`,background:sel?"rgba(201,168,76,.18)":"rgba(255,255,255,.04)",color:sel?"#ffd700":"#666",fontFamily:"inherit",fontSize:12,fontWeight:sel?700:400,cursor:"pointer",transition:"all .2s",letterSpacing:".03em"}}>
+                    {sel?"✓ ":""}{opt}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Comentario libre */}
+            <textarea
+              value={reportComment}
+              onChange={e=>{ if(e.target.value.length<=500) setReportComment(e.target.value); if(reportStatus!=="idle") setReportStatus("idle"); }}
+              placeholder="Describe el problema con más detalle (opcional, máx. 500 caracteres)…"
+              rows={4}
+              style={{width:"100%",background:"rgba(255,255,255,.06)",border:"1px solid #2a3a5a",borderRadius:10,padding:"10px 12px",color:"#ddd",fontFamily:"inherit",fontSize:13,resize:"vertical",outline:"none",boxSizing:"border-box",lineHeight:1.6}}
+            />
+            <div style={{fontSize:11,color:"#334",textAlign:"right",marginTop:3}}>{reportComment.length}/500</div>
+
+            {/* Botón enviar */}
+            {reportStatus==="ok"?(
+              <div style={{marginTop:12,padding:"12px 16px",background:"rgba(68,170,100,.12)",border:"1px solid #4aa",borderRadius:10,color:"#4da",fontSize:14,fontWeight:700,textAlign:"center"}}>
+                ✅ Reporte enviado. ¡Gracias por ayudarnos a mejorar!
+              </div>
+            ):reportStatus==="error"?(
+              <div style={{marginTop:12,padding:"12px 16px",background:"rgba(200,50,50,.12)",border:"1px solid #a44",borderRadius:10,color:"#e77",fontSize:14,textAlign:"center"}}>
+                ❌ No se pudo enviar. Intenta de nuevo.
+                <button onClick={()=>setReportStatus("idle")} style={{marginLeft:10,background:"none",border:"none",color:"#e77",cursor:"pointer",textDecoration:"underline",fontFamily:"inherit",fontSize:13}}>Reintentar</button>
+              </div>
+            ):(
+              <button
+                onClick={submitReport}
+                disabled={reportStatus==="sending"||(reportTypes.length===0&&!reportComment.trim())}
+                style={{marginTop:12,width:"100%",padding:"12px",borderRadius:10,border:"none",background:(reportTypes.length>0||reportComment.trim())?"linear-gradient(90deg,#c9a84c,#ffd700)":"rgba(255,255,255,.08)",color:(reportTypes.length>0||reportComment.trim())?"#0a1f40":"#444",fontFamily:"inherit",fontSize:15,fontWeight:800,cursor:(reportTypes.length>0||reportComment.trim())?"pointer":"not-allowed",letterSpacing:".08em",transition:"all .2s"}}
+              >
+                {reportStatus==="sending"?"⏳ Enviando…":"📤 ENVIAR REPORTE"}
+              </button>
+            )}
+
+            <div style={{marginTop:12,fontSize:11,color:"#334",textAlign:"center",lineHeight:1.5}}>
+              Tu reporte llega directamente al equipo técnico. No incluye datos personales.
+            </div>
+          </div>
+        </div>
+        );
+      })()}
 
       {/* ── SCHEDULE ── */}
       {view==="schedule"&&(
