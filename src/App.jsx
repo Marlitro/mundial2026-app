@@ -1941,21 +1941,53 @@ export default function App() {
         return(
         <div style={{maxWidth:700,margin:"20px auto",padding:"0 16px 80px"}}>
           <div style={{fontSize:20,fontWeight:900,color:"#fff",marginBottom:4}}>❓ GUÍA DE LA APP</div>
-          <div style={{fontSize:13,color:"#556",marginBottom:20}}>Todo lo que necesitas saber para sacarle el máximo provecho</div>
+          <div style={{fontSize:13,color:"#556",marginBottom:16}}>Todo lo que necesitas saber para sacarle el máximo provecho al Mundial 2026</div>
 
-          {sec("📅","CALENDARIO","Muestra los 72 partidos del Mundial ordenados por fecha. Filtra por equipo, fase (Grupos / Ronda de 32 / Cuartos / Semis / Final) o sede. Cambia entre Junio y Julio con las pestañas superiores. Selecciona tu zona horaria (ET · CT · MT · PT) en el encabezado para ver los horarios ajustados. Toca cualquier partido para ver más detalles y compartirlo.")}
-          {sec("🔴","EN VIVO","Muestra los partidos del día con los marcadores en tiempo real. Los scores se actualizan automáticamente cada 2 minutos desde fuentes oficiales. Cuando se marca un gol, aparece una animación de celebración en toda la pantalla sin importar en qué sección estés.")}
-          {sec("🎉","ANIMACIÓN DE GOL","Cada vez que se detecta un gol en un partido en vivo, aparece automáticamente una celebración con confetti, el marcador actualizado y el nombre del equipo que anotó. Toca la pantalla o espera 5 segundos para cerrarla.")}
-          {sec("📊","POSICIONES","Tabla de posiciones de los 12 grupos (A–L) con puntos, partidos jugados, goles a favor, goles en contra y diferencia de goles. Se actualiza durante el torneo.")}
-          {sec("⚽","GOLEADORES","Antes del inicio del torneo (11 jun) muestra los 10 candidatos favoritos a la Bota de Oro con datos verificados. Durante el torneo muestra los goleadores reales obtenidos de football-data.org (fuente oficial FIFA), validados contra ESPN.")}
-          {sec("🔮","PREDICCIÓN IA","Elige un partido del calendario, selecciona quién crees que gana (local, visitante o empate) y la IA analiza el partido considerando historial, forma reciente, fase del torneo y sede. Recibirás probabilidades, jugadores clave y un análisis detallado en segundos.")}
-          {sec("🎯","QUINIELA","Crea tu quiniela personal prediciendo los 24 partidos de la fase de grupos. Comparte tu código único (MUN26-XXXXX) con amigos para comparar predicciones. Tus respuestas se guardan automáticamente en el dispositivo.")}
-          {sec("📰","NOTICIAS","Genera titulares y resúmenes de las noticias más relevantes del Mundial en español usando IA. Toca 'Actualizar' para obtener las últimas noticias. El ícono de YouTube te lleva a búsquedas del tema en video.")}
-          {sec("🏟️","SEDES","Galería de los 16 estadios sede del Mundial 2026 en EE.UU., México y Canadá. Toca cada estadio para ver capacidad, superficie, curiosidades, partidos que albergará y su ubicación. Las fotos son imágenes reales con licencia libre (Wikimedia Commons).")}
-          {sec("🏆","BRACKET","Vista del cuadro eliminatorio completo desde Cuartos de Final hasta la Gran Final (19 jul, MetLife Stadium). Incluye las semifinales, el partido por el tercer lugar y la final.")}
-          {sec("⭐","FAVORITOS","Selecciona tu selección favorita para ver solo sus partidos de forma rápida, con el marcador en vivo y una cuenta regresiva al próximo partido.")}
-          {sec("🕐","ZONA HORARIA","Cambia entre ET (Este), CT (Centro), MT (Montaña) y PT (Pacífico) en el encabezado para ver todos los horarios ajustados a tu ubicación.")}
-          {sec("📺","IDIOMA","Alterna entre Español e English para cambiar el canal de TV recomendado para cada partido (Telemundo/Univision en español, Fox Sports/NBC en inglés).")}
+          {/* ── PLANES ── */}
+          <div style={{background:"linear-gradient(135deg,rgba(201,168,76,.12),rgba(8,40,80,.8))",border:"1.5px solid #c9a84c55",borderRadius:14,padding:"16px",marginBottom:16}}>
+            <div style={{fontSize:15,fontWeight:900,color:"#ffd700",marginBottom:10}}>🏅 PLANES DISPONIBLES</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {[
+                {tier:"Fan Básico",price:"Gratis",color:"#556",items:["📅 Calendario 72 partidos","🔴 Marcadores en vivo","📊 Tabla de posiciones","⚽ Goleadores","🔮 1 predicción IA por día","🎯 Quiniela (modo solo)","📰 Noticias IA","🏟️ Sedes y estadios","⭐ Partido favorito"]},
+                {tier:"Fan Pro",price:"$0.99",color:"#4a9eff",items:["⚡ Todo lo de Básico","🔮 20 predicciones IA (torneo)","🎯 Grupos privados en quiniela","📤 Compartir ranking del grupo"]},
+                {tier:"Fan VIP",price:"$4.99",color:"#ffd700",items:["⭐ Todo lo de Pro","🔮 Predicciones IA ilimitadas ∞","🗺️ Guía Turista 16 sedes","🍽️ Restaurantes latinos","🚗 Transporte y fan zones","🗣️ Frases útiles + WhatsApp","☁️ Clima y seguridad por sede"]},
+                {tier:"Fan Ultimate",price:"$7.99",color:"#ff7a00",items:["🏆 Todo lo anterior","🎰 Análisis de apuestas con IA","📊 Picks con % de probabilidad"]},
+              ].map(({tier,price,color,items})=>(
+                <div key={tier} style={{background:"rgba(0,0,0,.2)",borderLeft:`3px solid ${color}`,borderRadius:8,padding:"10px 12px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                    <span style={{fontSize:13,fontWeight:900,color}}>{tier}</span>
+                    <span style={{fontSize:13,fontWeight:800,color:"#fff"}}>{price}</span>
+                  </div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:"3px 12px"}}>
+                    {items.map(i=><span key={i} style={{fontSize:11,color:"#aaa"}}>{i}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>openPricing("vip")} style={{width:"100%",marginTop:12,padding:"11px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#c9a84c,#ffd700)",color:"#0a1f40",fontWeight:900,fontSize:14,cursor:"pointer"}}>
+              🛒 Ver planes y activar
+            </button>
+          </div>
+
+          {/* ── FUNCIONES ── */}
+          <div style={{fontSize:13,fontWeight:800,color:"#888",letterSpacing:".1em",marginBottom:10}}>FUNCIONES DE LA APP</div>
+
+          {sec("📅","CALENDARIO","Muestra los 72 partidos del Mundial ordenados por fecha. Filtra por equipo, fase (Grupos / R32 / Cuartos / Semis / Final) o sede anfitriona. Cambia entre Junio y Julio en las pestañas superiores. Ajusta tu zona horaria (ET · CT · MT · PT) en el encabezado. Toca cualquier partido para ver detalles y compartirlo — el texto compartido incluye las banderas de los equipos 🏳️.")}
+          {sec("🔴","EN VIVO","Partidos del día con marcadores en tiempo real, actualizados cada 2 minutos. Cuando se marca un gol aparece una animación de celebración en pantalla completa. Toca en cualquier lugar o espera 5 segundos para cerrarla.")}
+          {sec("📊","POSICIONES","Tabla de los 12 grupos (A–L) con puntos, partidos jugados, goles a favor/en contra y diferencia. Se actualiza automáticamente durante el torneo.")}
+          {sec("⚽","GOLEADORES","Antes del 11 jun muestra los 10 candidatos a la Bota de Oro. Durante el torneo cambia a goleadores reales en tiempo real desde football-data.org.")}
+          {sec("🔮","PREDICCIÓN IA","Elige un partido, selecciona tu resultado esperado (local / empate / visitante) y Claude IA analiza el partido. Recibirás: probabilidades con banderas de cada equipo, marcador predicho, jugadores clave y análisis. Límites: 1/día (Básico), 20 totales (Pro), ilimitadas (VIP/Ultimate).")}
+          {sec("🎯","QUINIELA — MODO SOLO","Predice los 24 partidos de grupos. Sistema de puntos: ⭐ 3 pts marcador exacto · ✅ 1 pt resultado correcto · ❌ 0 pts fallo. Ingresa tu apodo, haz tus picks y guárdalos. Compares en la tabla global con jugadores de todo el mundo. Gratis para todos.")}
+          {sec("🎯","QUINIELA — GRUPOS PRIVADOS (Pro)","Con Fan Pro creas tu grupo privado con un código único. Compártelo por WhatsApp con amigos, familia o la oficina. Todos hacen sus picks y el ranking se actualiza en vivo. Desde la pantalla del grupo toca '📤 Compartir' para enviar el ranking completo por WhatsApp con medallas 🥇🥈🥉.")}
+          {sec("🗺️","GUÍA DEL TURISTA LATINO (VIP)","Información completa para las 16 sedes: restaurantes latinos, opciones de transporte (Uber, metro, parking, shuttle), fan zones oficiales, frases útiles en inglés/francés con botón de compartir por WhatsApp, clima mes a mes, nivel de seguridad y hospedaje recomendado. Al entrar verás el contenido 2 segundos y luego aparece la oferta de desbloqueo.")}
+          {sec("🏟️","SEDES","Galería de los 16 estadios en EE.UU., México y Canadá. Toca cada uno para ver capacidad, superficie, curiosidades, partidos que albergará y foto real (Wikimedia Commons).")}
+          {sec("🏆","BRACKET","Cuadro eliminatorio completo: Cuartos de Final → Semifinales → 3er lugar → Final (19 jul, MetLife Stadium).")}
+          {sec("⭐","FAVORITOS","Selecciona tu selección para ver solo sus partidos, marcador en vivo y cuenta regresiva al siguiente partido.")}
+          {sec("📰","NOTICIAS","Genera 8 titulares del Mundial con IA. Toca el ícono de YouTube para buscar el tema en video.")}
+          {sec("📤","TARJETAS DE COMPARTIR","En cualquier partido toca el botón compartir para generar una tarjeta visual con banderas, horario, estadio y canal de TV. El texto copiado incluye emojis de bandera de cada equipo para que se vea bien en WhatsApp.")}
+          {sec("🕐","ZONA HORARIA","ET (Este) · CT (Centro) · MT (Montaña) · PT (Pacífico). Se aplica a todos los horarios del app al instante.")}
+          {sec("📺","IDIOMA DE TV","Español → Telemundo / Universo. English → FOX / FS1 / Tubi.")}
+          {sec("⚡","MEJORAR PLAN","Toca el botón en la esquina superior derecha del encabezado para ver todos los planes, comprar en Gumroad y activar tu código. También puedes activar tu código directamente desde ahí si ya compraste.")}
 
           {/* ── APOYA EL PROYECTO ── */}
           <div style={{borderTop:"2px solid #c9a84c44",paddingTop:20,marginTop:10,marginBottom:10}}>
